@@ -1,0 +1,54 @@
+import { betterAuth } from "better-auth"
+import { pool } from "@/lib/db"
+import { ADMIN_EMAILS } from "@/lib/admin-emails"
+
+export const auth = betterAuth({
+  database: pool,
+  baseURL:
+    process.env.BETTER_AUTH_URL ??
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : process.env.V0_RUNTIME_URL),
+  emailAndPassword: {
+    enabled: true,
+    autoSignIn: true,
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => {
+          // Lock the admin back-office to the approved admin emails only.
+          if (!ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+            throw new Error(
+              "This email is not authorized for admin access.",
+            )
+          }
+          return { data: user }
+        },
+      },
+    },
+  },
+  trustedOrigins: [
+    ...(process.env.V0_RUNTIME_URL ? [process.env.V0_RUNTIME_URL] : []),
+    ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
+    ...(process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? [`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`]
+      : []),
+  ],
+  session: {
+    expiresIn: 60 * 60 * 24 * 7, // 7 days
+    updateAge: 60 * 60 * 24, // 1 day
+  },
+  ...(process.env.NODE_ENV === "development"
+    ? {
+        advanced: {
+          defaultCookieAttributes: {
+            sameSite: "none" as const,
+            secure: true,
+          },
+        },
+      }
+    : {}),
+})

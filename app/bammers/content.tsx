@@ -3,41 +3,20 @@
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { Wallet, Zap, Users, Eye } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { HeroBackground } from "@/components/hero-background"
 import { PhoneDemo } from "@/components/phone-demo"
-import { FeatureGrid } from "@/components/feature-grid"
+import { PainPoints } from "@/components/pain-points"
+import { BenefitsTriad } from "@/components/benefits-triad"
+import { Testimonials } from "@/components/testimonials"
+import { ValueStack } from "@/components/value-stack"
 import { HowItWorks } from "@/components/how-it-works"
 import { FAQ } from "@/components/faq"
 import { SocialProof } from "@/components/social-proof"
 import { DemoSection } from "@/components/demo-section"
 import { SignupForm } from "@/components/signup-form"
 import { images } from "@/lib/images"
-
-const features = [
-  {
-    icon: Wallet,
-    headline: "Pre-buy at a discount",
-    body: "Lock in drinks before you arrive. Pay less. Walk in ready.",
-  },
-  {
-    icon: Zap,
-    headline: "Flash deals all night",
-    body: "Live offers drop as the night moves. Catch them in real time.",
-  },
-  {
-    icon: Users,
-    headline: "Plan with friends",
-    body: "Share a venue, deal, or night to the group chat in one tap.",
-  },
-  {
-    icon: Eye,
-    headline: "No more guessing",
-    body: "See the vibe, what's live, and where the night is moving.",
-  },
-]
 
 const howItWorksSteps = [
   {
@@ -61,7 +40,7 @@ const faqItems = [
   {
     question: "When is BamSip available?",
     answer:
-      "Manchester first — we're onboarding venues now. Drop your city when you sign up and we'll let you know when we land near you.",
+      "Manchester first — we're onboarding venues now. Drop your city when you register and we'll let you know when we land near you.",
   },
   {
     question: "Is BamSip free to use?",
@@ -81,7 +60,7 @@ const faqItems = [
   {
     question: "What if my venue isn't listed?",
     answer:
-      "Tell us — there's a request field after you sign up. We're adding Manchester venues every week.",
+      "Tell us — there's a request field after you register. We're adding Manchester venues every week.",
   },
 ]
 
@@ -90,7 +69,7 @@ export function BammersContent() {
     <div className="min-h-screen bg-ink">
       <Header />
 
-      {/* Hero */}
+      {/* STEP 1 — Need / desire */}
       <section className="relative overflow-hidden pt-28 pb-16 sm:pt-32 lg:pt-40 lg:pb-24">
         <HeroBackground />
         <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-8 lg:px-8">
@@ -109,8 +88,9 @@ export function BammersContent() {
                 <span className="lowercase text-flame">nights out.</span>
               </h1>
               <p className="mx-auto mt-5 max-w-md text-lg leading-relaxed text-cream2 lg:mx-0">
-                the whole night, sorted before you leave the house. pre-buy your
-                drinks for less, catch flash deals as they drop, and skip the queue.
+                the night you actually wanted — sorted before you leave the
+                house. pre-buy your drinks for less, catch flash deals as they
+                drop, and walk straight past the queue.
               </p>
 
               <div className="mt-6 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
@@ -123,7 +103,6 @@ export function BammersContent() {
                   </span>
                 ))}
               </div>
-
             </motion.div>
           </div>
 
@@ -142,10 +121,8 @@ export function BammersContent() {
         </div>
       </section>
 
-      <FeatureGrid features={features} sectionLabel="Why BamSip" />
-
-      {/* Image value band */}
-      <section className="px-4 py-6 sm:px-6 lg:px-8">
+      {/* Visual break — the vibe */}
+      <section className="px-4 pb-6 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-5xl gap-4 sm:grid-cols-3">
           {[
             { img: images.cocktails, label: "drinks pre-bought" },
@@ -176,15 +153,27 @@ export function BammersContent() {
         </div>
       </section>
 
+      {/* STEP 2 — What's wrong with current solutions */}
+      <PainPoints />
+
+      {/* STEP 3 — Benefits (functional / emotional / financial) */}
+      <BenefitsTriad />
+
+      {/* STEP 4 — Reasons to believe: see it, learn the mechanism, trust the backers */}
       <DemoSection />
-
       <HowItWorks steps={howItWorksSteps} />
-
       <SocialProof variant="compact" />
 
+      {/* STEP 5 — Testimonials */}
+      <Testimonials />
+
+      {/* STEP 6 — Build the value */}
+      <ValueStack />
+
+      {/* Objection handling */}
       <FAQ items={faqItems} />
 
-      {/* Signup CTA */}
+      {/* STEP 7 — CTA */}
       <section
         id="waitlist"
         className="relative overflow-hidden border-t border-hairline px-4 py-20 sm:px-6 lg:px-8"
@@ -194,16 +183,20 @@ export function BammersContent() {
           style={{ background: "radial-gradient(circle, rgba(255,107,84,0.18), transparent 70%)" }}
         />
         <div className="relative mx-auto flex max-w-md flex-col items-center text-center">
-          <h2 className="mb-8 font-display text-3xl font-bold lowercase text-balance text-cream sm:text-4xl">
-            don&apos;t miss the manchester launch.
+          <h2 className="mb-3 font-display text-3xl font-bold lowercase text-balance text-cream sm:text-4xl">
+            be first through the door.
           </h2>
+          <p className="mb-8 text-cream2">
+            register your interest and we&apos;ll get you in for the Manchester
+            launch.
+          </p>
           <SignupForm variant="bammer" />
         </div>
       </section>
 
       <Footer />
 
-      {/* Floating waitlist CTA — the only CTA on this page */}
+      {/* Floating CTA — the only persistent CTA on this page */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
@@ -218,7 +211,7 @@ export function BammersContent() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cream/70 opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-cream" />
           </span>
-          join the waitlist
+          register interest
         </Link>
       </motion.div>
     </div>

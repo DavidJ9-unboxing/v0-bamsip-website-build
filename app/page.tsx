@@ -1,6 +1,7 @@
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { HomeHero } from "@/components/home-hero"
+import { GalleryMarquee } from "@/components/gallery-marquee"
 import { SplitChooser } from "@/components/split-chooser"
 import { DemoSection } from "@/components/demo-section"
 import { HowItWorks } from "@/components/how-it-works"
@@ -86,6 +87,7 @@ export default function HomePage() {
       <Header />
       <main>
         <HomeHero />
+        <GalleryMarquee />
         <SplitChooser />
         <DemoSection />
         <HowItWorks steps={howItWorksSteps} />

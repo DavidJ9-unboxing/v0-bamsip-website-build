@@ -123,6 +123,22 @@
   .coral-glow {
     box-shadow: 0 0 60px -12px rgba(255, 107, 84, 0.45);
   }
+  /* Infinite horizontal marquee for the image gallery */
+  @keyframes bamsip-marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  .animate-marquee {
+    animation: bamsip-marquee 50s linear infinite;
+    will-change: transform;
+  }
+  .marquee-pause:hover .animate-marquee {
+    animation-play-state: paused;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

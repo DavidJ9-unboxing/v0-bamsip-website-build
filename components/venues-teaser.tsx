@@ -1,8 +1,10 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { motion } from "framer-motion"
 import { ArrowRight, Zap, Wallet, BarChart3, SlidersHorizontal } from "lucide-react"
+import { images } from "@/lib/images"
 
 const features = [
   { icon: Zap, title: "Live offers in 15 seconds", body: "Push a deal when you need traffic, not the next day." },
@@ -14,9 +16,26 @@ const features = [
 export function VenuesTeaser() {
   return (
     <section className="relative overflow-hidden border-y border-hairline bg-ink2 px-4 py-20 sm:px-6 lg:px-8">
+      {/* Bar photo backdrop on the right */}
+      <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 lg:block">
+        <Image
+          src={images.bartender.src || "/placeholder.svg"}
+          alt=""
+          fill
+          sizes="50vw"
+          className="object-cover opacity-25"
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(90deg, var(--ink2) 0%, rgba(20,20,25,0.6) 40%, transparent 100%)",
+          }}
+        />
+      </div>
       <div
         className="pointer-events-none absolute -right-20 top-0 h-80 w-80 rounded-full blur-[120px]"
-        style={{ background: "radial-gradient(circle, rgba(255,181,71,0.18), transparent 70%)" }}
+        style={{ background: "radial-gradient(circle, rgba(255,181,71,0.22), transparent 70%)" }}
       />
       <div className="relative mx-auto max-w-5xl">
         <div className="max-w-2xl">

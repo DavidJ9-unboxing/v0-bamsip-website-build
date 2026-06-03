@@ -19,17 +19,33 @@ export function HomeHero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <span className="inline-flex items-center gap-2 rounded-full border border-hairline bg-ink2/60 px-3 py-1 text-xs text-cream2 backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-success" />
+            <span className="inline-flex items-center gap-2 rounded-full border border-flame/30 bg-flame/10 px-3 py-1 text-xs font-medium text-flame backdrop-blur">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-flame" />
               Manchester rollout — now onboarding
             </span>
             <h1 className="mt-5 font-display text-5xl font-bold leading-[0.95] tracking-tight text-balance text-cream sm:text-6xl lg:text-7xl">
               <span className="lowercase">smarter </span>
               <span className="lowercase text-flame">nights out.</span>
             </h1>
-            <p className="mx-auto mt-5 max-w-md text-lg text-cream2 lg:mx-0">
-              pre-buy drinks. grab flash deals. plan with mates. walk in ready.
+            <p className="mx-auto mt-5 max-w-md text-lg leading-relaxed text-cream2 lg:mx-0">
+              the whole night, sorted before you leave the house. pre-buy your
+              drinks for less, catch flash deals as they drop, and walk straight
+              past the queue.
             </p>
+
+            {/* Proof chips */}
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
+              {["free to download", "save up to 40%", "skip the queue"].map(
+                (chip) => (
+                  <span
+                    key={chip}
+                    className="rounded-full border border-hairline bg-ink2/60 px-3 py-1 text-xs text-cream2 backdrop-blur"
+                  >
+                    {chip}
+                  </span>
+                ),
+              )}
+            </div>
 
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
               <Link

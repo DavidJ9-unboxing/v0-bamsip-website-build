@@ -1,15 +1,37 @@
 "use client"
 
+import Image from "next/image"
 import { motion } from "framer-motion"
+import { images } from "@/lib/images"
 
 /**
- * Generative nightlife backdrop: deep black base, drifting coral bloom,
- * warm amber haze, faint violet depth, a sparse data-point grid, and grain.
- * Manchester-at-night feel without literal stock photography.
+ * Cinematic nightlife backdrop: a real Manchester-bar photo layered under
+ * drifting coral bloom, warm amber haze, faint violet depth, a sparse
+ * data-point grid, and grain. Warm and alive, still premium.
  */
 export function HeroBackground() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden bg-ink">
+      {/* Photographic base layer */}
+      <div className="absolute inset-0">
+        <Image
+          src={images.heroNight.src || "/placeholder.svg"}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover opacity-50"
+        />
+        {/* Warm wash over the photo to keep text legible and on-brand */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(10,10,15,0.55) 0%, rgba(10,10,15,0.65) 45%, rgba(10,10,15,0.92) 100%)",
+          }}
+        />
+      </div>
+
       {/* Coral bloom */}
       <motion.div
         className="absolute -top-32 left-1/2 h-[44rem] w-[44rem] -translate-x-1/2 rounded-full blur-[120px]"

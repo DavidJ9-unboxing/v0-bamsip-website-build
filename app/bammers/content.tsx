@@ -1,17 +1,20 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { motion } from "framer-motion"
 import { ArrowRight, Wallet, Zap, Users, Eye } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { HeroBackground } from "@/components/hero-background"
+import { PhoneDemo } from "@/components/phone-demo"
 import { FeatureGrid } from "@/components/feature-grid"
 import { HowItWorks } from "@/components/how-it-works"
 import { FAQ } from "@/components/faq"
 import { SocialProof } from "@/components/social-proof"
 import { DemoSection } from "@/components/demo-section"
 import { SignupForm } from "@/components/signup-form"
+import { images } from "@/lib/images"
 
 const features = [
   {
@@ -88,39 +91,99 @@ export function BammersContent() {
       <Header />
 
       {/* Hero */}
-      <section className="relative overflow-hidden pt-28 pb-16 sm:pt-32 lg:pt-40">
+      <section className="relative overflow-hidden pt-28 pb-16 sm:pt-32 lg:pt-40 lg:pb-24">
         <HeroBackground />
-        <div className="relative z-10 mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+        <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-8 lg:px-8">
+          <div className="text-center lg:text-left">
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <span className="inline-flex items-center gap-2 rounded-full border border-hairline bg-ink2/60 px-3 py-1 text-xs text-cream2 backdrop-blur">
+                <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                for bammers
+              </span>
+              <h1 className="mt-5 font-display text-5xl font-bold leading-[0.95] tracking-tight text-balance text-cream sm:text-6xl lg:text-7xl">
+                <span className="lowercase">smarter </span>
+                <span className="lowercase text-flame">nights out.</span>
+              </h1>
+              <p className="mx-auto mt-5 max-w-md text-lg leading-relaxed text-cream2 lg:mx-0">
+                the whole night, sorted before you leave the house. pre-buy your
+                drinks for less, catch flash deals as they drop, and skip the queue.
+              </p>
+
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
+                {["free to download", "save up to 40%", "skip the queue"].map((chip) => (
+                  <span
+                    key={chip}
+                    className="rounded-full border border-hairline bg-ink2/60 px-3 py-1 text-xs text-cream2 backdrop-blur"
+                  >
+                    {chip}
+                  </span>
+                ))}
+              </div>
+
+              <div className="mt-8 flex justify-center lg:justify-start">
+                <Link
+                  href="#waitlist"
+                  className="inline-flex items-center gap-2 rounded-full bg-flame px-6 py-3 text-sm font-semibold text-cream outline-none transition-all hover:bg-flame-soft focus-visible:ring-2 focus-visible:ring-flame focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+                >
+                  get early access
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </motion.div>
+          </div>
+
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            initial={{ opacity: 0, y: 40, rotate: -2 }}
+            animate={{ opacity: 1, y: 0, rotate: -2 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="flex justify-center lg:justify-end"
           >
-            <span className="inline-flex items-center gap-2 rounded-full border border-hairline bg-ink2/60 px-3 py-1 text-xs text-cream2 backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-success" />
-              for bammers
-            </span>
-            <h1 className="mt-5 font-display text-5xl font-bold leading-[0.95] tracking-tight text-balance text-cream sm:text-6xl lg:text-7xl">
-              <span className="lowercase">smarter </span>
-              <span className="lowercase text-flame">nights out.</span>
-            </h1>
-            <p className="mx-auto mt-5 max-w-md text-lg text-cream2">
-              pre-buy drinks. grab flash deals. skip the hassle.
-            </p>
-            <div className="mt-8 flex justify-center">
-              <Link
-                href="#waitlist"
-                className="inline-flex items-center gap-2 rounded-full bg-flame px-6 py-3 text-sm font-semibold text-cream outline-none transition-all hover:bg-flame-soft focus-visible:ring-2 focus-visible:ring-flame focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
-              >
-                get early access
-                <ArrowRight className="h-4 w-4" />
-              </Link>
+            <div className="[perspective:1200px]">
+              <div className="[transform:rotateY(-6deg)]">
+                <PhoneDemo float />
+              </div>
             </div>
           </motion.div>
         </div>
       </section>
 
       <FeatureGrid features={features} sectionLabel="Why BamSip" />
+
+      {/* Image value band */}
+      <section className="px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-5xl gap-4 sm:grid-cols-3">
+          {[
+            { img: images.cocktails, label: "drinks pre-bought" },
+            { img: images.crowd, label: "the night, planned" },
+            { img: images.bartender, label: "tap. redeem. done." },
+          ].map((item, i) => (
+            <motion.figure
+              key={item.label}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+              className="relative h-56 overflow-hidden rounded-2xl border border-hairline"
+            >
+              <Image
+                src={item.img.src || "/placeholder.svg"}
+                alt={item.img.alt}
+                fill
+                sizes="(max-width: 640px) 100vw, 33vw"
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-transparent to-transparent" />
+              <figcaption className="absolute bottom-4 left-4 font-display text-lg font-semibold lowercase text-cream">
+                {item.label}
+              </figcaption>
+            </motion.figure>
+          ))}
+        </div>
+      </section>
 
       <DemoSection />
 

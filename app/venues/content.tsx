@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { motion } from "framer-motion"
 import { ArrowRight, Timer, Wallet, BarChart3, SlidersHorizontal } from "lucide-react"
 import { Header } from "@/components/header"
@@ -12,6 +13,7 @@ import { HowItWorks } from "@/components/how-it-works"
 import { FAQ } from "@/components/faq"
 import { SocialProof } from "@/components/social-proof"
 import { SignupForm } from "@/components/signup-form"
+import { images } from "@/lib/images"
 
 const features = [
   {
@@ -139,6 +141,59 @@ export function VenuesContent() {
       </section>
 
       <FeatureGrid features={features} sectionLabel="Built for operators" />
+
+      {/* Credibility / outcome band */}
+      <section className="px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-5xl items-center gap-10 lg:grid-cols-2">
+          <motion.div
+            initial={{ opacity: 0, x: -24 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="relative h-72 overflow-hidden rounded-3xl border border-hairline lg:h-80"
+          >
+            <Image
+              src={images.barInterior.src || "/placeholder.svg"}
+              alt={images.barInterior.alt}
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-transparent" />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: 24 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <p className="text-xs font-medium uppercase tracking-wider text-amber">
+              quiet night → full bar
+            </p>
+            <h2 className="mt-3 font-display text-3xl font-bold text-balance text-cream sm:text-4xl">
+              turn your slowest hours into your best ones.
+            </h2>
+            <p className="mt-4 leading-relaxed text-cream2">
+              every venue has dead windows — a wet tuesday, the early-doors lull,
+              the hour before the rush. BamSip puts a live, capped offer in front
+              of nearby bammers the moment you need traffic, then proves exactly
+              what it brought in.
+            </p>
+            <ul className="mt-6 space-y-3">
+              {[
+                "pre-sold drinks, locked-in spend",
+                "you set the cap — never a discount race",
+                "redemption-by-redemption attribution",
+              ].map((line) => (
+                <li key={line} className="flex items-start gap-3 text-cream2">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber" />
+                  {line}
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        </div>
+      </section>
 
       <HowItWorks steps={howItWorksSteps} />
 

@@ -9,21 +9,21 @@ const columns = [
     kicker: "functional",
     title: "the whole night, handled",
     points: [
-      "pre-buy drinks and skip the bar queue",
-      "live map of what's actually on tonight",
-      "tap your phone at the bar to redeem",
+      "themed events & live music in one feed",
+      "grab your spot at bammer-only nights",
+      "pre-buy your drinks before you head out",
       "share the plan to the group in one tap",
     ],
   },
   {
     icon: Heart,
     kicker: "emotional",
-    title: "show up like you own the place",
+    title: "the night everyone remembers",
     points: [
-      "no decision paralysis — the night's already sorted",
-      "walk past the queue, drink in hand",
+      "be first to the gigs and themed nights",
+      "more time with mates, less faffing",
       "be the friend with the plan, every time",
-      "more dancing, less faffing",
+      "feel part of something, not just out",
     ],
   },
   {
@@ -32,7 +32,7 @@ const columns = [
     title: "spend less, do more",
     points: [
       "save up to 40% pre-buying drinks",
-      "flash deals drop all night long",
+      "member pricing on event tickets",
       "no booking fees, no catch",
       "free to download, free to use",
     ],

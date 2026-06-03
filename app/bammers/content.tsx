@@ -21,18 +21,18 @@ import { images } from "@/lib/images"
 const howItWorksSteps = [
   {
     number: 1,
-    headline: "discover what's live",
-    body: "open the map, filter by vibe, find the deals near you tonight.",
+    headline: "find your night",
+    body: "browse themed events, live music and bammer-only nights happening near you.",
   },
   {
     number: 2,
-    headline: "pre-buy before you arrive",
-    body: "lock in your drinks at a discount and skip the bar queue.",
+    headline: "lock it in with mates",
+    body: "grab your spot, pre-buy your drinks at a discount, share the plan to the group.",
   },
   {
     number: 3,
-    headline: "tap to redeem",
-    body: "hold your phone to the reader at the bar. sorted.",
+    headline: "turn up and tap",
+    body: "hold your phone to the reader at the bar. sorted — now enjoy the night.",
   },
 ]
 
@@ -48,14 +48,19 @@ const faqItems = [
       "Yes. Free to download, free to use. You only pay for the drinks you pre-buy — at a discount.",
   },
   {
+    question: "What are bammer-only nights?",
+    answer:
+      "Themed events and live-music nights we put on with our venues, exclusive to BamSip members. Early access to tickets, special line-ups, and drinks deals you won't get anywhere else.",
+  },
+  {
     question: "How do flash deals work?",
     answer:
       "Venues push live offers when they want to fill a quiet window. You see them in real time, capped and time-limited so they stay good.",
   },
   {
-    question: "Can I plan with friends?",
+    question: "Can I plan the night with friends?",
     answer:
-      "Share a venue, a deal, or a whole night to the group chat in one tap. Everyone arrives ready.",
+      "Share an event, a venue, or a whole night to the group chat in one tap. Everyone grabs their spot and arrives ready.",
   },
   {
     question: "What if my venue isn't listed?",
@@ -88,13 +93,13 @@ export function BammersContent() {
                 <span className="lowercase text-flame">nights out.</span>
               </h1>
               <p className="mx-auto mt-5 max-w-md text-lg leading-relaxed text-cream2 lg:mx-0">
-                the night you actually wanted — sorted before you leave the
-                house. pre-buy your drinks for less, catch flash deals as they
-                drop, and walk straight past the queue.
+                the night you actually wanted, with the people you want to be
+                with. themed events, live music and bammer-only nights — plus
+                your drinks pre-bought for less before you even head out.
               </p>
 
               <div className="mt-6 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
-                {["free to download", "save up to 40%", "skip the queue"].map((chip) => (
+                {["free to download", "save up to 40%", "bammer-only events"].map((chip) => (
                   <span
                     key={chip}
                     className="rounded-full border border-hairline bg-ink2/60 px-3 py-1 text-xs text-cream2 backdrop-blur"
@@ -125,9 +130,9 @@ export function BammersContent() {
       <section className="px-4 pb-6 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-5xl gap-4 sm:grid-cols-3">
           {[
-            { img: images.cocktails, label: "drinks pre-bought" },
-            { img: images.crowd, label: "the night, planned" },
-            { img: images.bartender, label: "tap. redeem. done." },
+            { img: images.crowd, label: "nights with your people" },
+            { img: images.live, label: "live music & themed events" },
+            { img: images.toast, label: "bammer-only nights" },
           ].map((item, i) => (
             <motion.figure
               key={item.label}

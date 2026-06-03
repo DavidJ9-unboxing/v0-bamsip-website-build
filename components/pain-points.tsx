@@ -1,13 +1,13 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Clock, Wallet, MessageSquare, HelpCircle } from "lucide-react"
+import { CalendarX, Wallet, MessageSquare, HelpCircle } from "lucide-react"
 
 const pains = [
   {
-    icon: Clock,
-    title: "queues everywhere",
-    body: "at the door. at the bar. 25 minutes for a round you already knew you wanted.",
+    icon: CalendarX,
+    title: "you miss the good nights",
+    body: "the gig, the themed night, the one everyone talks about after — you hear about it too late, every time.",
   },
   {
     icon: Wallet,

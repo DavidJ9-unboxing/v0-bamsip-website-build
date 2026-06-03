@@ -11,21 +11,21 @@ const testimonials = [
     name: "Maya",
     detail: "Northern Quarter regular",
     quote:
-      "Pre-bought a round before we even left the flat. Walked straight to the bar, tapped, done. Felt like cheating.",
+      "Got us into a bammer-only live set before tickets even went public. The whole crew came — best night we've had in ages.",
   },
   {
     initial: "J",
     name: "Jordan",
     detail: "out most Fridays",
     quote:
-      "A flash deal popped up two streets away and we just went. Best spontaneous night we've had in ages.",
+      "There's always a themed night on somewhere. We just pick one, pre-buy the drinks and go. No more standing around deciding.",
   },
   {
     initial: "P",
     name: "Priya",
     detail: "always plans the group",
     quote:
-      "Shared the whole night to the group chat in one tap. For once nobody argued about where to go.",
+      "Shared the whole event to the group chat in one tap. For once everyone actually showed up to the same place.",
   },
 ]
 

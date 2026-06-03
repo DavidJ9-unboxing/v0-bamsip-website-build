@@ -5,10 +5,10 @@ import { motion } from "framer-motion"
 import { Check, ArrowRight } from "lucide-react"
 
 const stack = [
+  { item: "Bammer-only nights, gigs & themed events", value: "members only" },
+  { item: "Early access + member pricing on tickets", value: "first dibs" },
   { item: "Pre-buy drinks at up to 40% off", value: "save £££ a night" },
-  { item: "Live flash deals all night long", value: "members only" },
-  { item: "Skip-the-queue redemption at the bar", value: "your time back" },
-  { item: "Live map of what's on tonight", value: "never guess again" },
+  { item: "Live flash deals all night long", value: "drop alerts" },
   { item: "One-tap plans for the whole group", value: "no more chaos" },
   { item: "First dibs on Manchester launch venues", value: "early access" },
 ]

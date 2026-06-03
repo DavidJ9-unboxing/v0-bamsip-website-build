@@ -14,7 +14,7 @@ const cards = [
     icon: Beer,
     accent: "flame" as const,
     image: images.toast,
-    lines: ["pre-buy drinks for less.", "skip the bar queue.", "find where the night's at."],
+    lines: ["themed events & live music.", "bammer-only nights.", "drinks pre-bought for less."],
     cta: "explore the app",
   },
   {

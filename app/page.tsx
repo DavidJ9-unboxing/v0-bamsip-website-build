@@ -13,18 +13,18 @@ import { FinalCta } from "@/components/final-cta"
 const howItWorksSteps = [
   {
     number: 1,
-    headline: "discover what's live",
-    body: "open the map, filter by vibe, see every deal dropping near you tonight.",
+    headline: "find your night",
+    body: "browse themed events, live music and bammer-only nights happening near you.",
   },
   {
     number: 2,
-    headline: "pre-buy before you arrive",
-    body: "lock in your drinks at a discount. pay less, skip the bar queue.",
+    headline: "lock it in with mates",
+    body: "grab your spot, pre-buy your drinks at a discount, share the plan to the group.",
   },
   {
     number: 3,
-    headline: "tap to redeem at the bar",
-    body: "hold your phone to the reader. sorted. show the bar and sip.",
+    headline: "turn up and tap",
+    body: "hold your phone to the reader at the bar. sorted — now enjoy the night.",
   },
 ]
 

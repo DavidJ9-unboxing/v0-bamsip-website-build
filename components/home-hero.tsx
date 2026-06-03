@@ -28,14 +28,14 @@ export function HomeHero() {
               <span className="lowercase text-flame">nights out.</span>
             </h1>
             <p className="mx-auto mt-5 max-w-md text-lg leading-relaxed text-cream2 lg:mx-0">
-              the whole night, sorted before you leave the house. pre-buy your
-              drinks for less, catch flash deals as they drop, and walk straight
-              past the queue.
+              themed events, live music and bammer-only nights — with your
+              drinks pre-bought for less. the whole night, sorted with your
+              mates before you head out.
             </p>
 
             {/* Proof chips */}
             <div className="mt-6 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
-              {["free to download", "save up to 40%", "skip the queue"].map(
+              {["free to download", "save up to 40%", "bammer-only events"].map(
                 (chip) => (
                   <span
                     key={chip}

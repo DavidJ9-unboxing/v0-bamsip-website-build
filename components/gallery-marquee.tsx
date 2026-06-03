@@ -5,14 +5,14 @@ import { motion } from "framer-motion"
 import { images, galleryImages } from "@/lib/images"
 
 const captions: Record<string, string> = {
-  crowd: "big nights, sorted",
+  crowd: "nights with your people",
   cocktails: "drinks, locked in",
   barInterior: "the city's best rooms",
-  live: "what's on tonight",
-  bartender: "no queue, no faff",
+  live: "live music & themed nights",
+  bartender: "bammer-only events",
   street: "Manchester after dark",
   toast: "plan with mates",
-  heroNight: "your next round",
+  heroNight: "your next big night",
 }
 
 export function GalleryMarquee() {

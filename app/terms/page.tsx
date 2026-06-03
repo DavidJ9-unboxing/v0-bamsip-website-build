@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-ink">
-      <Header variant="bammers" />
+      <Header />
 
       <main className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
@@ -75,7 +75,7 @@ export default function TermsPage() {
         </div>
       </main>
 
-      <Footer variant="bammers" />
+      <Footer />
     </div>
   )
 }

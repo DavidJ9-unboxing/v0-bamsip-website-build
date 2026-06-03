@@ -6,8 +6,8 @@ import { CalendarX, Wallet, MessageSquare, HelpCircle } from "lucide-react"
 const pains = [
   {
     icon: CalendarX,
-    title: "you miss the good nights",
-    body: "the gig, the themed night, the one everyone talks about after — you hear about it too late, every time.",
+    title: "you miss the good stuff",
+    body: "the deal two streets away, the gig, the night everyone talks about after — you always hear too late.",
   },
   {
     icon: Wallet,

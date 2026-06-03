@@ -13,8 +13,8 @@ import { FinalCta } from "@/components/final-cta"
 const howItWorksSteps = [
   {
     number: 1,
-    headline: "find your night",
-    body: "browse themed events, live music and bammer-only nights happening near you.",
+    headline: "see what's on, and what's hot",
+    body: "a live map of deals near you right now, plus events and bammer-only nights worth planning for.",
   },
   {
     number: 2,

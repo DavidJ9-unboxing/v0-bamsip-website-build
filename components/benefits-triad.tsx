@@ -9,8 +9,8 @@ const columns = [
     kicker: "functional",
     title: "the whole night, handled",
     points: [
-      "themed events & live music in one feed",
-      "grab your spot at bammer-only nights",
+      "live map of the best deals near you now",
+      "events & bammer-only nights when you want them",
       "pre-buy your drinks before you head out",
       "share the plan to the group in one tap",
     ],
@@ -20,10 +20,10 @@ const columns = [
     kicker: "emotional",
     title: "the night everyone remembers",
     points: [
-      "be first to the gigs and themed nights",
+      "always know where the night's at",
       "more time with mates, less faffing",
       "be the friend with the plan, every time",
-      "feel part of something, not just out",
+      "first to the gigs and themed nights too",
     ],
   },
   {

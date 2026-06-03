@@ -21,8 +21,8 @@ import { images } from "@/lib/images"
 const howItWorksSteps = [
   {
     number: 1,
-    headline: "find your night",
-    body: "browse themed events, live music and bammer-only nights happening near you.",
+    headline: "see what's on, and what's hot",
+    body: "a live map of deals near you right now, plus events and bammer-only nights worth planning for.",
   },
   {
     number: 2,
@@ -93,13 +93,13 @@ export function BammersContent() {
                 <span className="lowercase text-flame">nights out.</span>
               </h1>
               <p className="mx-auto mt-5 max-w-md text-lg leading-relaxed text-cream2 lg:mx-0">
-                the night you actually wanted, with the people you want to be
-                with. themed events, live music and bammer-only nights — plus
-                your drinks pre-bought for less before you even head out.
+                a big themed night or just a great one with your mates — either
+                way, you see exactly where the best deals are right now, and your
+                drinks are pre-bought for less before you head out.
               </p>
 
               <div className="mt-6 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
-                {["free to download", "save up to 40%", "bammer-only events"].map((chip) => (
+                {["free to download", "live deals near you", "save up to 40%"].map((chip) => (
                   <span
                     key={chip}
                     className="rounded-full border border-hairline bg-ink2/60 px-3 py-1 text-xs text-cream2 backdrop-blur"
@@ -131,8 +131,8 @@ export function BammersContent() {
         <div className="mx-auto grid max-w-5xl gap-4 sm:grid-cols-3">
           {[
             { img: images.crowd, label: "nights with your people" },
-            { img: images.live, label: "live music & themed events" },
-            { img: images.toast, label: "bammer-only nights" },
+            { img: images.cocktails, label: "see the deals, right now" },
+            { img: images.live, label: "events & bammer-only nights" },
           ].map((item, i) => (
             <motion.figure
               key={item.label}

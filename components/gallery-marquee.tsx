@@ -9,7 +9,7 @@ const captions: Record<string, string> = {
   cocktails: "drinks, locked in",
   barInterior: "the city's best rooms",
   live: "live music & themed nights",
-  bartender: "bammer-only events",
+  bartender: "deals dropping near you",
   street: "Manchester after dark",
   toast: "plan with mates",
   heroNight: "your next big night",

@@ -1,0 +1,115 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* BamSip Brand Colors - Dark Mode First */
+  --ink: #0A0A0A;
+  --ink2: #141414;
+  --ink3: #1E1E1E;
+  --flame: #FF6B6B;
+  --flame-soft: #FF8A8A;
+  --amber: #F5A623;
+  --amber-soft: #FFC04D;
+  --cream: #FFFFFF;
+  --cream2: #E5E5E5;
+  --mute: #9CA3AF;
+  --hairline: rgba(255,255,255,0.08);
+  --success: #34D399;
+  --error: #EF4444;
+  
+  /* Semantic tokens */
+  --background: var(--ink);
+  --foreground: var(--cream);
+  --card: var(--ink2);
+  --card-foreground: var(--cream);
+  --popover: var(--ink2);
+  --popover-foreground: var(--cream);
+  --primary: var(--flame);
+  --primary-foreground: var(--cream);
+  --secondary: var(--amber);
+  --secondary-foreground: var(--ink);
+  --muted: var(--ink3);
+  --muted-foreground: var(--mute);
+  --accent: var(--flame);
+  --accent-foreground: var(--cream);
+  --destructive: var(--error);
+  --destructive-foreground: var(--cream);
+  --border: var(--hairline);
+  --input: var(--ink3);
+  --ring: var(--flame);
+  --radius: 1rem;
+}
+
+@theme inline {
+  --font-sans: 'Inter', 'Inter Fallback', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  
+  /* BamSip Brand Colors */
+  --color-ink: var(--ink);
+  --color-ink2: var(--ink2);
+  --color-ink3: var(--ink3);
+  --color-flame: var(--flame);
+  --color-flame-soft: var(--flame-soft);
+  --color-amber: var(--amber);
+  --color-amber-soft: var(--amber-soft);
+  --color-cream: var(--cream);
+  --color-cream2: var(--cream2);
+  --color-mute: var(--mute);
+  --color-hairline: var(--hairline);
+  --color-success: var(--success);
+  --color-error: var(--error);
+  
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-ink text-cream antialiased;
+  }
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ink);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ink3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--mute);
+}

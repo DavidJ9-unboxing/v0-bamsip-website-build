@@ -12,6 +12,8 @@ import { BenefitsTriad } from "@/components/benefits-triad"
 import { Testimonials } from "@/components/testimonials"
 import { ValueStack } from "@/components/value-stack"
 import { HowItWorks } from "@/components/how-it-works"
+import { EventTimeline } from "@/components/event-timeline"
+import { ReferralOffer } from "@/components/referral-offer"
 import { FAQ } from "@/components/faq"
 import { SocialProof } from "@/components/social-proof"
 import { DemoSection } from "@/components/demo-section"
@@ -167,10 +169,17 @@ export function BammersContent() {
       {/* STEP 4 — Reasons to believe: see it, learn the mechanism, trust the backers */}
       <DemoSection />
       <HowItWorks steps={howItWorksSteps} />
+
+      {/* When it's happening — Manchester July → summer → Christmas */}
+      <EventTimeline />
+
       <SocialProof variant="compact" />
 
       {/* STEP 5 — Testimonials */}
       <Testimonials />
+
+      {/* Referral reward — £5 per 50 mates */}
+      <ReferralOffer />
 
       {/* STEP 6 — Build the value */}
       <ValueStack />
@@ -193,7 +202,8 @@ export function BammersContent() {
           </h2>
           <p className="mb-8 text-cream2">
             register your interest and we&apos;ll get you in for the Manchester
-            launch.
+            launch this July — plus your own invite link to earn £5 for every 50
+            mates you bring.
           </p>
           <SignupForm variant="bammer" />
         </div>

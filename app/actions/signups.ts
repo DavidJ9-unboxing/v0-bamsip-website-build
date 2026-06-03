@@ -35,6 +35,7 @@ export async function registerBammer(input: {
   const name = input.name.trim()
   if (!name || !email) return { ok: false, error: "Name and email are required." }
 
+  try {
   // Already registered?
   const existing = await db
     .select({ id: bammerSignups.id, referralCode: bammerSignups.referralCode })
@@ -115,6 +116,10 @@ export async function registerBammer(input: {
   }
 
   return { ok: true, referralCode }
+  } catch (err) {
+    console.error("[v0] registerBammer THREW:", (err as Error)?.message, (err as Error)?.stack)
+    return { ok: false, error: "something went wrong" }
+  }
 }
 
 /* -------------------------------- Venue -------------------------------- */

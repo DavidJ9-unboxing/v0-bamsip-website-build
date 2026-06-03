@@ -79,7 +79,7 @@ export function BammersContent() {
       {/* STEP 1 — Need / desire */}
       <section className="relative overflow-hidden pt-28 pb-16 sm:pt-32 lg:pt-40 lg:pb-24">
         <HeroBackground />
-        <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-8 lg:px-8">
+        <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-8 lg:px-8">
           <div className="text-center lg:text-left">
             <motion.div
               initial={{ opacity: 0, y: 24 }}
@@ -117,9 +117,9 @@ export function BammersContent() {
             initial={{ opacity: 0, y: 40, rotate: -2 }}
             animate={{ opacity: 1, y: 0, rotate: -2 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="flex justify-center lg:justify-end"
+            className="flex min-w-0 justify-center lg:justify-end"
           >
-            <div className="[perspective:1200px]">
+            <div className="w-full max-w-[300px] [perspective:1200px]">
               <div className="[transform:rotateY(-6deg)]">
                 <PhoneDemo float />
               </div>

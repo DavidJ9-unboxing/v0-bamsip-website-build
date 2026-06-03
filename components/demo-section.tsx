@@ -39,13 +39,13 @@ export function DemoSection() {
           </p>
         </div>
 
-        <div className="grid items-center gap-12 lg:grid-cols-2">
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="flex justify-center lg:order-2"
+            className="flex min-w-0 justify-center lg:order-2"
           >
             <PhoneDemo />
           </motion.div>

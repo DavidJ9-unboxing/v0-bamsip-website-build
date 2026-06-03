@@ -144,7 +144,7 @@ export function VenuesContent() {
 
       {/* Credibility / outcome band */}
       <section className="px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-5xl items-center gap-10 lg:grid-cols-2">
+        <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-10 lg:grid-cols-2">
           <motion.div
             initial={{ opacity: 0, x: -24 }}
             whileInView={{ opacity: 1, x: 0 }}

@@ -23,24 +23,36 @@ export function ChainMark({ className = "" }: { className?: string }) {
       className={className}
       aria-hidden="true"
     >
-      {/* Two interlocking chain links */}
-      <rect
-        x="6.5"
-        y="15"
-        width="26"
-        height="18"
-        rx="9"
+      {/* Two interlocking ring links with an over/under weave */}
+      <defs>
+        <clipPath id="bamsip-weave-top">
+          <circle cx="24" cy="16" r="5.5" />
+        </clipPath>
+      </defs>
+      {/* left link (cream) */}
+      <circle
+        cx="18"
+        cy="24"
+        r="10"
         stroke="var(--cream)"
-        strokeWidth="3.5"
+        strokeWidth="3.6"
       />
-      <rect
-        x="15.5"
-        y="15"
-        width="26"
-        height="18"
-        rx="9"
+      {/* right link (flame) — sits over the left at the bottom crossing */}
+      <circle
+        cx="30"
+        cy="24"
+        r="10"
         stroke="var(--flame)"
-        strokeWidth="3.5"
+        strokeWidth="3.6"
+      />
+      {/* redraw the left link only at the top crossing so it weaves over */}
+      <circle
+        cx="18"
+        cy="24"
+        r="10"
+        stroke="var(--cream)"
+        strokeWidth="3.6"
+        clipPath="url(#bamsip-weave-top)"
       />
     </svg>
   )

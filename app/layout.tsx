@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next"
-import { Inter } from "next/font/google"
+import { Inter, Space_Grotesk } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
@@ -8,25 +8,32 @@ const inter = Inter({
   variable: "--font-inter",
 })
 
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+})
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://bamsip.com"
+
 export const metadata: Metadata = {
-  title: "BamSip — One app, two sides. Both get paid.",
+  title: "BamSip — Smarter nights out.",
   description:
-    "Manchester's new nightlife marketplace. Pre-buy drinks, fill dead nights.",
-  metadataBase: new URL("https://bamsip.com"),
+    "Manchester's nightlife app for pre-bought drinks, live deals, venue discovery, and smarter nights out.",
+  metadataBase: new URL(SITE_URL),
   openGraph: {
-    title: "BamSip — One app, two sides. Both get paid.",
+    title: "BamSip — Smarter nights out.",
     description:
-      "Manchester's new nightlife marketplace. Pre-buy drinks, fill dead nights.",
-    url: "https://bamsip.com",
+      "Manchester's nightlife app for pre-bought drinks, live deals, venue discovery, and smarter nights out.",
+    url: SITE_URL,
     siteName: "BamSip",
     locale: "en_GB",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "BamSip — One app, two sides. Both get paid.",
+    title: "BamSip — Smarter nights out.",
     description:
-      "Manchester's new nightlife marketplace. Pre-buy drinks, fill dead nights.",
+      "Manchester's nightlife app for pre-bought drinks, live deals, venue discovery, and smarter nights out.",
   },
   robots: {
     index: true,
@@ -46,7 +53,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} bg-ink`}>
+    <html
+      lang="en"
+      className={`${inter.variable} ${spaceGrotesk.variable} bg-ink`}
+    >
       <body className="font-sans antialiased min-h-screen bg-ink text-cream">
         {children}
         {process.env.NODE_ENV === "production" && <Analytics />}

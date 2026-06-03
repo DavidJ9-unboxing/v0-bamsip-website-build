@@ -4,11 +4,7 @@ import Link from "next/link"
 import { BamSipLogo } from "./bamsip-logo"
 import { Instagram, Linkedin } from "lucide-react"
 
-interface FooterProps {
-  variant?: "bammers" | "venues"
-}
-
-export function Footer({ variant = "bammers" }: FooterProps) {
+export function Footer() {
   return (
     <footer className="border-t border-hairline bg-ink">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -18,21 +14,18 @@ export function Footer({ variant = "bammers" }: FooterProps) {
 
           {/* Links */}
           <nav className="flex items-center gap-6 text-sm">
-            {variant === "bammers" ? (
-              <Link
-                href="/venues"
-                className="text-mute hover:text-cream transition-colors"
-              >
-                Venues
-              </Link>
-            ) : (
-              <Link
-                href="/bammers"
-                className="text-mute hover:text-cream transition-colors"
-              >
-                Bammers
-              </Link>
-            )}
+            <Link
+              href="/bammers"
+              className="text-mute hover:text-cream transition-colors"
+            >
+              For Bammers
+            </Link>
+            <Link
+              href="/venues"
+              className="text-mute hover:text-cream transition-colors"
+            >
+              For Venues
+            </Link>
             <Link
               href="/privacy"
               className="text-mute hover:text-cream transition-colors"

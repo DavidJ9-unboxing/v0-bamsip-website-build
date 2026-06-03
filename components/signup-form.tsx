@@ -30,6 +30,7 @@ const venueSchema = z.object({
   roleOther: z.string().optional(),
   email: z.string().email("enter a valid email"),
   phone: z.string().min(10, "enter a valid phone number"),
+  city: z.string().min(1, "select a city"),
 })
 
 type BammerFormData = z.infer<typeof bammerSchema>
@@ -65,6 +66,7 @@ export function SignupForm({ variant, headline }: SignupFormProps) {
       roleOther: "",
       email: "",
       phone: "",
+      city: "",
     },
   })
 
@@ -338,6 +340,29 @@ export function SignupForm({ variant, headline }: SignupFormProps) {
           {venueForm.formState.errors.phone && (
             <p className="text-error text-xs mt-1">
               {venueForm.formState.errors.phone.message}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <Select
+            onValueChange={(value) => venueForm.setValue("city", value)}
+          >
+            <SelectTrigger className="bg-ink3 border-hairline text-cream h-12 rounded-xl focus:border-flame focus:ring-flame">
+              <SelectValue placeholder="city" />
+            </SelectTrigger>
+            <SelectContent className="bg-ink2 border-hairline">
+              <SelectItem value="Manchester">Manchester</SelectItem>
+              <SelectItem value="Leeds">Leeds</SelectItem>
+              <SelectItem value="Liverpool">Liverpool</SelectItem>
+              <SelectItem value="Birmingham">Birmingham</SelectItem>
+              <SelectItem value="London">London</SelectItem>
+              <SelectItem value="Other">Other</SelectItem>
+            </SelectContent>
+          </Select>
+          {venueForm.formState.errors.city && (
+            <p className="text-error text-xs mt-1">
+              {venueForm.formState.errors.city.message}
             </p>
           )}
         </div>

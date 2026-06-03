@@ -5,16 +5,17 @@
 
 :root {
   /* BamSip Brand Colors - Dark Mode First */
-  --ink: #0A0A0A;
-  --ink2: #141414;
-  --ink3: #1E1E1E;
-  --flame: #FF6B6B;
-  --flame-soft: #FF8A8A;
-  --amber: #F5A623;
-  --amber-soft: #FFC04D;
+  --ink: #0A0A0F;
+  --ink2: #141419;
+  --ink3: #1C1C24;
+  --flame: #FF6B54;
+  --flame-soft: #FF8A78;
+  --amber: #FFB547;
+  --amber-soft: #FFC97A;
+  --violet: #7C3AED;
   --cream: #FFFFFF;
-  --cream2: #E5E5E5;
-  --mute: #9CA3AF;
+  --cream2: #E5E5EA;
+  --mute: #9A9AA8;
   --hairline: rgba(255,255,255,0.08);
   --success: #34D399;
   --error: #EF4444;
@@ -43,7 +44,8 @@
 }
 
 @theme inline {
-  --font-sans: 'Inter', 'Inter Fallback', system-ui, sans-serif;
+  --font-sans: var(--font-inter), 'Inter Fallback', system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), var(--font-inter), system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -73,6 +75,7 @@
   --color-flame-soft: var(--flame-soft);
   --color-amber: var(--amber);
   --color-amber-soft: var(--amber-soft);
+  --color-violet: var(--violet);
   --color-cream: var(--cream);
   --color-cream2: var(--cream2);
   --color-mute: var(--mute);
@@ -92,6 +95,43 @@
   }
   body {
     @apply bg-ink text-cream antialiased;
+  }
+  ::selection {
+    background: rgba(255, 107, 84, 0.3);
+    color: #fff;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+  /* Faint noise/grain overlay */
+  .grain::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  /* Soft coral bloom helper */
+  .coral-glow {
+    box-shadow: 0 0 60px -12px rgba(255, 107, 84, 0.45);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
   }
 }
 

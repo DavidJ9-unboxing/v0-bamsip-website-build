@@ -8,61 +8,69 @@ interface BamSipLogoProps {
   linkToHome?: boolean
 }
 
+const sizeClasses = {
+  sm: { mark: "h-6 w-6", text: "text-lg" },
+  md: { mark: "h-8 w-8", text: "text-xl" },
+  lg: { mark: "h-10 w-10", text: "text-2xl" },
+}
+
+export function ChainMark({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+    >
+      {/* Two interlocking chain links */}
+      <rect
+        x="6.5"
+        y="15"
+        width="26"
+        height="18"
+        rx="9"
+        stroke="var(--cream)"
+        strokeWidth="3.5"
+      />
+      <rect
+        x="15.5"
+        y="15"
+        width="26"
+        height="18"
+        rx="9"
+        stroke="var(--flame)"
+        strokeWidth="3.5"
+      />
+    </svg>
+  )
+}
+
 export function BamSipLogo({
   className = "",
   size = "md",
   linkToHome = true,
 }: BamSipLogoProps) {
-  const sizeClasses = {
-    sm: "h-6",
-    md: "h-8",
-    lg: "h-10",
-  }
+  const s = sizeClasses[size]
 
   const Logo = () => (
     <div className={`flex items-center gap-2 ${className}`}>
-      {/* Connection Mark Symbol */}
-      <svg
-        viewBox="0 0 40 40"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className={sizeClasses[size]}
+      <ChainMark className={s.mark} />
+      <span
+        className={`font-display font-bold tracking-tight text-cream ${s.text}`}
       >
-        {/* Left circle */}
-        <circle
-          cx="14"
-          cy="20"
-          r="10"
-          stroke="white"
-          strokeWidth="2"
-          fill="none"
-        />
-        {/* Right circle */}
-        <circle
-          cx="26"
-          cy="20"
-          r="10"
-          stroke="white"
-          strokeWidth="2"
-          fill="none"
-        />
-        {/* Coral node at intersection */}
-        <circle cx="20" cy="20" r="4" fill="#FF6B6B" />
-      </svg>
-      {/* Wordmark */}
-      <span className="font-bold text-cream tracking-tight">
-        Bam
-        <span className="relative">
-          S
-          <span className="text-flame">i</span>p
-        </span>
+        bam<span className="text-flame">sip</span>
       </span>
     </div>
   )
 
   if (linkToHome) {
     return (
-      <Link href="/" className="inline-flex">
+      <Link
+        href="/"
+        className="inline-flex rounded-md outline-none focus-visible:ring-2 focus-visible:ring-flame"
+        aria-label="BamSip home"
+      >
         <Logo />
       </Link>
     )

@@ -1,84 +1,69 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { MapPin, Users, ShieldCheck } from "lucide-react"
 
 interface SocialProofProps {
   variant?: "compact" | "full"
 }
 
+// PLACEHOLDER credibility copy. Sacha Lord / NTIA involvement is NOT confirmed
+// and is subject to approval. Replace before any final public launch.
+const markers = [
+  { icon: MapPin, text: "Manchester rollout now onboarding." },
+  { icon: Users, text: "Built with nightlife operators." },
+  { icon: ShieldCheck, text: "Sacha Lord & UK NTIA involvement, subject to approval." },
+]
+
 export function SocialProof({ variant = "compact" }: SocialProofProps) {
   if (variant === "full") {
     return (
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-ink2">
-        <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center"
-          >
-            {/* Quote */}
-            <blockquote className="text-xl sm:text-2xl text-cream font-medium leading-relaxed mb-8">
-              &ldquo;BamSip is the first tool I&apos;ve seen that actually changes the
-              economics for operators. Live offers, real attribution, and venues
-              stay in charge of the price floor. We&apos;re behind it.&rdquo;
-            </blockquote>
+      <section className="bg-ink2 px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-4xl">
+          <div className="grid gap-3 sm:grid-cols-3">
+            {markers.map((m, i) => (
+              <motion.div
+                key={m.text}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.08 }}
+                className="flex items-center gap-3 rounded-2xl border border-hairline bg-ink px-5 py-4"
+              >
+                <m.icon className="h-5 w-5 shrink-0 text-flame" />
+                <span className="text-sm text-cream2">{m.text}</span>
+              </motion.div>
+            ))}
+          </div>
 
-            {/* Attribution */}
-            <div className="flex flex-col items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-ink3 flex items-center justify-center">
-                <span className="text-2xl font-bold text-flame">SL</span>
+          {/* Partner / press logo slots */}
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {["Partner", "Partner", "Press", "Press"].map((label, i) => (
+              <div
+                key={i}
+                className="flex h-14 items-center justify-center rounded-xl border border-dashed border-hairline text-xs text-mute"
+              >
+                {label} logo
               </div>
-              <div className="text-center">
-                <p className="text-cream font-semibold">Sacha Lord</p>
-                <p className="text-mute text-sm">
-                  President, UK Night Time Industries Association
-                </p>
-                <p className="text-flame text-xs mt-1">10% Shareholder</p>
-              </div>
-            </div>
-
-            {/* NTIA Logo placeholder */}
-            <div className="mt-12 pt-8 border-t border-hairline">
-              <p className="text-xs text-mute uppercase tracking-wider mb-4">
-                Backed by
-              </p>
-              <div className="flex items-center justify-center gap-8 opacity-60">
-                <div className="text-cream font-bold">NTIA</div>
-              </div>
-            </div>
-          </motion.div>
+            ))}
+          </div>
         </div>
       </section>
     )
   }
 
-  // Compact variant for Bammers page
+  // Compact strip
   return (
-    <section className="py-12 px-4 sm:px-6 lg:px-8 bg-ink2">
-      <div className="max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center space-y-4"
-        >
-          <p className="text-cream2 text-sm sm:text-base">
-            Built with{" "}
-            <span className="text-cream font-semibold">Sacha Lord</span> —
-            President of the{" "}
-            <span className="text-cream font-semibold">
-              UK Night Time Industries Association
-            </span>
-            .
-          </p>
-          <p className="text-mute text-sm">
-            Launching Manchester, May 2026 — then Leeds, Liverpool, Birmingham,
-            London.
-          </p>
-        </motion.div>
+    <section className="bg-ink2 px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-4xl flex-col items-center gap-2 text-center">
+        <p className="text-sm text-cream2">
+          Manchester rollout now onboarding — built with nightlife operators.
+        </p>
+        <p className="text-xs text-mute">
+          {/* PLACEHOLDER: not confirmed, subject to approval */}
+          Sacha Lord &amp; UK Night Time Industries Association involvement,
+          subject to approval.
+        </p>
       </div>
     </section>
   )

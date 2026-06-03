@@ -8,6 +8,7 @@ const venueInterestSchema = z.object({
   roleOther: z.string().optional(),
   email: z.string().email(),
   phone: z.string().min(10),
+  city: z.string().min(1),
 })
 
 export async function POST(request: Request) {

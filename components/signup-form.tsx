@@ -221,7 +221,7 @@ export function SignupForm({ variant, headline }: SignupFormProps) {
             {e.name && <p className="mt-1 text-xs text-error">{e.name.message}</p>}
           </div>
 
-          <div>
+          <div suppressHydrationWarning>
             <Input {...bammerForm.register("email")} type="email" placeholder="email" className={fieldClass} />
             {e.email && <p className="mt-1 text-xs text-error">{e.email.message}</p>}
           </div>
@@ -346,7 +346,7 @@ export function SignupForm({ variant, headline }: SignupFormProps) {
           {ve.role && <p className="mt-1 text-xs text-error">{ve.role.message}</p>}
         </div>
 
-        <div>
+        <div suppressHydrationWarning>
           <Input {...venueForm.register("email")} type="email" placeholder="email" className={fieldClass} />
           {ve.email && <p className="mt-1 text-xs text-error">{ve.email.message}</p>}
         </div>

@@ -10,14 +10,28 @@ import {
 import { and, desc, eq, ilike, or, sql, inArray } from "drizzle-orm"
 import { getAdminSession } from "@/lib/admin"
 import { generateReferralCode } from "@/lib/referral"
-import { sendEmail, sendSms } from "@/lib/messaging"
-import { sendPayout } from "@/lib/paypal"
+import {
+  sendEmail,
+  sendSms,
+  emailConfigured,
+  smsConfigured,
+} from "@/lib/messaging"
+import { sendPayout, paypalConfigured } from "@/lib/paypal"
 import { revalidatePath } from "next/cache"
 
 async function assertAdmin() {
   const session = await getAdminSession()
   if (!session) throw new Error("Unauthorized")
   return session.user
+}
+
+export async function getServiceStatus() {
+  await assertAdmin()
+  return {
+    email: emailConfigured(),
+    sms: smsConfigured(),
+    paypal: paypalConfigured(),
+  }
 }
 
 /* ------------------------------- Dashboard ------------------------------- */
@@ -412,11 +426,22 @@ export async function sendPayoutNow(payoutId: number) {
     note: "BamSip referral reward — thanks for spreading the word!",
   })
 
+  // If PayPal isn't configured yet, leave the payout as "owed" so it can be
+  // sent later once credentials are added — don't mark it failed.
+  if ("skipped" in result && result.skipped) {
+    await db
+      .update(payouts)
+      .set({ error: "PayPal not configured — add PayPal API keys to send." })
+      .where(eq(payouts.id, payoutId))
+    revalidatePath("/admin/payouts")
+    return { ok: false as const, skipped: true as const }
+  }
+
   await db
     .update(payouts)
     .set({
       status: result.ok ? "paid" : "failed",
-      paypalBatchId: result.batchId ?? null,
+      paypalBatchId: result.ok ? result.batchId ?? null : null,
       error: result.ok ? null : result.error ?? "Unknown error",
       paidAt: result.ok ? new Date() : null,
     })

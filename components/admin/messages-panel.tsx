@@ -64,13 +64,6 @@ export function MessagesPanel({
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-cream">Messages</h1>
-        <p className="text-sm text-mute">
-          Broadcast updates to bammers and venues by email or SMS.
-        </p>
-      </div>
-
       {(!emailConfigured || !smsConfigured) && (
         <div className="flex items-start gap-3 rounded-2xl border border-amber/30 bg-amber/10 p-4 text-sm text-amber-soft">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />

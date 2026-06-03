@@ -143,7 +143,7 @@ export function VenuesContent() {
       <FeatureGrid features={features} sectionLabel="Built for operators" />
 
       {/* Credibility / outcome band */}
-      <section className="px-4 py-16 sm:px-6 lg:px-8">
+      <section className="overflow-hidden px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-10 lg:grid-cols-2">
           <motion.div
             initial={{ opacity: 0, x: -24 }}

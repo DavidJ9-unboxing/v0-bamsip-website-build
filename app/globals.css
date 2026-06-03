@@ -93,6 +93,14 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html,
+  body {
+    /* Prevent decorative blobs and off-screen reveal animations from
+       creating a horizontal scrollbar on mobile. `clip` (not `hidden`)
+       keeps the sticky header working. */
+    overflow-x: clip;
+    max-width: 100%;
+  }
   body {
     @apply bg-ink text-cream antialiased;
   }

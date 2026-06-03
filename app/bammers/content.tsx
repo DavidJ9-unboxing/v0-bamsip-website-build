@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { ArrowRight, Wallet, Zap, Users, Eye } from "lucide-react"
+import { Wallet, Zap, Users, Eye } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { HeroBackground } from "@/components/hero-background"
@@ -124,15 +124,6 @@ export function BammersContent() {
                 ))}
               </div>
 
-              <div className="mt-8 flex justify-center lg:justify-start">
-                <Link
-                  href="#waitlist"
-                  className="inline-flex items-center gap-2 rounded-full bg-flame px-6 py-3 text-sm font-semibold text-cream outline-none transition-all hover:bg-flame-soft focus-visible:ring-2 focus-visible:ring-flame focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
-                >
-                  get early access
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
             </motion.div>
           </div>
 
@@ -211,6 +202,25 @@ export function BammersContent() {
       </section>
 
       <Footer />
+
+      {/* Floating waitlist CTA — the only CTA on this page */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
+        className="fixed bottom-5 right-5 z-50 sm:bottom-6 sm:right-6"
+      >
+        <Link
+          href="#waitlist"
+          className="inline-flex items-center gap-2 rounded-full bg-flame px-6 py-3.5 text-sm font-semibold text-cream shadow-lg shadow-flame/30 outline-none transition-all hover:bg-flame-soft hover:shadow-flame/50 focus-visible:ring-2 focus-visible:ring-flame focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+        >
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cream/70 opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-cream" />
+          </span>
+          join the waitlist
+        </Link>
+      </motion.div>
     </div>
   )
 }

@@ -126,7 +126,7 @@ export function PayoutsPanel({
           owed across{" "}
           {rows.filter((r) => r.status === "owed").length} pending payout(s)
         </div>
-        <ExportButton kind="payouts" label="Export payouts CSV" />
+        <ExportButton kind="payouts" />
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-border">

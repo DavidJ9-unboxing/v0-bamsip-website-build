@@ -16,7 +16,7 @@ import {
   emailConfigured,
   smsConfigured,
 } from "@/lib/messaging"
-import { sendPayout, paypalConfigured } from "@/lib/paypal"
+import { sendPayout, paypalConfigured, paypalLive } from "@/lib/paypal"
 import { revalidatePath } from "next/cache"
 
 async function assertAdmin() {
@@ -31,6 +31,7 @@ export async function getServiceStatus() {
     email: emailConfigured(),
     sms: smsConfigured(),
     paypal: paypalConfigured(),
+    paypalLive: paypalLive(),
   }
 }
 

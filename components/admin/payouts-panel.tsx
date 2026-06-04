@@ -54,12 +54,14 @@ export function PayoutsPanel({
   totalOwed,
   adminEmail,
   approverEmail,
+  paypalLive = false,
 }: {
   payouts: Payout[]
   paypalConfigured: boolean
   totalOwed: number
   adminEmail: string
   approverEmail: string
+  paypalLive?: boolean
 }) {
   const canApprove =
     adminEmail.toLowerCase() === approverEmail.toLowerCase()
@@ -142,6 +144,30 @@ export function PayoutsPanel({
               owed and mark payouts as paid manually.
             </p>
           </div>
+        </div>
+      )}
+
+      {paypalConfigured && paypalLive && (
+        <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm">
+          <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-600" />
+          <p className="text-foreground">
+            <span className="font-medium">PayPal LIVE mode active</span> — sending
+            a payout transfers real money to the recipient.
+          </p>
+        </div>
+      )}
+
+      {paypalConfigured && !paypalLive && (
+        <div className="flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm">
+          <AlertCircle className="h-4 w-4 shrink-0 text-amber-600" />
+          <p className="text-foreground">
+            <span className="font-medium">PayPal SANDBOX mode</span> — payouts are
+            test-only. Set{" "}
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">
+              PAYPAL_ENV=live
+            </code>{" "}
+            to send real money.
+          </p>
         </div>
       )}
 

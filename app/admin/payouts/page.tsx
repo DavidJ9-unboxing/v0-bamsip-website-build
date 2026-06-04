@@ -23,6 +23,7 @@ export default async function PayoutsPage() {
       <PayoutsPanel
         payouts={rows}
         paypalConfigured={status.paypal}
+        paypalLive={status.paypalLive}
         totalOwed={totalOwed}
         adminEmail={admin.email}
         approverEmail={PAYOUT_APPROVER_EMAIL}

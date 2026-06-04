@@ -3,8 +3,10 @@
 import { useState } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { Menu, X, ArrowRight } from "lucide-react"
+import { Menu, X, ArrowRight, LayoutDashboard } from "lucide-react"
 import { BamSipLogo } from "./bamsip-logo"
+import { useSession } from "@/lib/auth-client"
+import { isAdminEmail } from "@/lib/admin-emails"
 
 const navLinks = [
   { label: "for bammers", href: "/bammers" },
@@ -15,6 +17,8 @@ const navLinks = [
 
 export function Header() {
   const [open, setOpen] = useState(false)
+  const { data: session } = useSession()
+  const isAdmin = isAdminEmail(session?.user?.email)
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-hairline bg-ink/70 backdrop-blur-xl">
@@ -35,13 +39,24 @@ export function Header() {
         </nav>
 
         {/* Desktop CTA — right */}
-        <Link
-          href="/#waitlist"
-          className="hidden items-center gap-1.5 rounded-full bg-flame px-4 py-2 text-sm font-semibold text-cream outline-none transition-all hover:bg-flame-soft focus-visible:ring-2 focus-visible:ring-flame focus-visible:ring-offset-2 focus-visible:ring-offset-ink md:inline-flex"
-        >
-          join waitlist
-          <ArrowRight className="h-4 w-4" />
-        </Link>
+        <div className="hidden items-center gap-3 md:flex">
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="inline-flex items-center gap-1.5 rounded-full border border-hairline px-3 py-2 text-sm font-semibold text-cream2 outline-none transition-colors hover:bg-ink2 hover:text-cream focus-visible:ring-2 focus-visible:ring-flame"
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              admin
+            </Link>
+          )}
+          <Link
+            href="/#waitlist"
+            className="inline-flex items-center gap-1.5 rounded-full bg-flame px-4 py-2 text-sm font-semibold text-cream outline-none transition-all hover:bg-flame-soft focus-visible:ring-2 focus-visible:ring-flame focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+          >
+            join waitlist
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
 
         {/* Mobile toggle */}
         <button
@@ -75,6 +90,16 @@ export function Header() {
                   {link.label}
                 </Link>
               ))}
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2 rounded-lg px-3 py-3 text-base text-cream2 transition-colors hover:bg-ink2 hover:text-cream"
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  admin dashboard
+                </Link>
+              )}
               <Link
                 href="/#waitlist"
                 onClick={() => setOpen(false)}

@@ -17,6 +17,7 @@ import {
   LogOut,
   Menu,
   X,
+  ExternalLink,
 } from "lucide-react"
 
 const links = [
@@ -83,6 +84,13 @@ export function AdminNav({ email }: { email: string }) {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
+          <Link
+            href="/"
+            className="flex items-center gap-1.5 rounded-lg border border-hairline px-3 py-2 text-sm text-cream2 transition-colors hover:bg-ink3 hover:text-cream"
+          >
+            <ExternalLink className="h-4 w-4" />
+            View site
+          </Link>
           <span className="max-w-[160px] truncate text-xs text-mute" title={email}>
             {email}
           </span>
@@ -129,6 +137,14 @@ export function AdminNav({ email }: { email: string }) {
               )
             })}
           </nav>
+          <Link
+            href="/"
+            onClick={() => setOpen(false)}
+            className="mt-1 flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-cream2 transition-colors hover:bg-ink3 hover:text-cream"
+          >
+            <ExternalLink className="h-4 w-4" />
+            View site
+          </Link>
           <div className="mt-3 flex items-center justify-between border-t border-hairline pt-3">
             <span className="max-w-[180px] truncate text-xs text-mute">{email}</span>
             <button

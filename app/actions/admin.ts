@@ -9,14 +9,14 @@ import {
 } from "@/lib/db/schema"
 import { and, desc, eq, ilike, or, sql, inArray } from "drizzle-orm"
 import { getAdminSession } from "@/lib/admin"
-import { generateReferralCode } from "@/lib/referral"
+import { generateReferralCode, PAYOUT_APPROVER_EMAIL } from "@/lib/referral"
 import {
   sendEmail,
   sendSms,
   emailConfigured,
   smsConfigured,
 } from "@/lib/messaging"
-import { sendPayout, paypalConfigured } from "@/lib/paypal"
+import { sendPayout, paypalConfigured, paypalLive } from "@/lib/paypal"
 import { revalidatePath } from "next/cache"
 
 async function assertAdmin() {
@@ -31,6 +31,7 @@ export async function getServiceStatus() {
     email: emailConfigured(),
     sms: smsConfigured(),
     paypal: paypalConfigured(),
+    paypalLive: paypalLive(),
   }
 }
 
@@ -409,6 +410,35 @@ export async function listPayouts() {
   return rows
 }
 
+/**
+ * Approve an over-cap payout. Only the designated approver
+ * (PAYOUT_APPROVER_EMAIL) may do this; flips "needs_approval" → "owed".
+ */
+export async function approvePayout(payoutId: number) {
+  const admin = await assertAdmin()
+  if (admin.email.toLowerCase() !== PAYOUT_APPROVER_EMAIL.toLowerCase()) {
+    return {
+      ok: false as const,
+      error: `Only ${PAYOUT_APPROVER_EMAIL} can approve over-cap payouts.`,
+    }
+  }
+  const [p] = await db
+    .select()
+    .from(payouts)
+    .where(eq(payouts.id, payoutId))
+    .limit(1)
+  if (!p) throw new Error("Payout not found")
+  if (p.status !== "needs_approval") {
+    return { ok: false as const, error: "This payout isn't awaiting approval." }
+  }
+  await db
+    .update(payouts)
+    .set({ status: "owed", error: null })
+    .where(eq(payouts.id, payoutId))
+  revalidatePath("/admin/payouts")
+  return { ok: true as const }
+}
+
 export async function sendPayoutNow(payoutId: number) {
   await assertAdmin()
   const [p] = await db
@@ -418,6 +448,12 @@ export async function sendPayoutNow(payoutId: number) {
     .limit(1)
   if (!p) throw new Error("Payout not found")
   if (p.status === "paid") return { ok: true, alreadyPaid: true }
+  if (p.status === "needs_approval") {
+    return {
+      ok: false as const,
+      error: `Needs approval from ${PAYOUT_APPROVER_EMAIL} before it can be sent.`,
+    }
+  }
 
   const result = await sendPayout({
     senderItemId: String(p.id),

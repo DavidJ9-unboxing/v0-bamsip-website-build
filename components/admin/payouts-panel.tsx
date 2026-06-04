@@ -17,8 +17,9 @@ import {
   sendPayoutNow,
   markPayoutPaid,
   setPayoutPaypalEmail,
+  approvePayout,
 } from "@/app/actions/admin"
-import { Check, Send, Pencil, AlertCircle } from "lucide-react"
+import { Check, Send, Pencil, AlertCircle, ShieldCheck, Lock } from "lucide-react"
 
 type Payout = {
   id: number
@@ -38,17 +39,32 @@ const statusStyles: Record<string, string> = {
   owed: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
   paid: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400",
   failed: "bg-red-500/15 text-red-700 dark:text-red-400",
+  needs_approval: "bg-orange-500/15 text-orange-700 dark:text-orange-400",
+  needs_details: "bg-muted text-muted-foreground",
+}
+
+const statusLabels: Record<string, string> = {
+  needs_approval: "needs approval",
+  needs_details: "needs details",
 }
 
 export function PayoutsPanel({
   payouts,
   paypalConfigured,
   totalOwed,
+  adminEmail,
+  approverEmail,
+  paypalLive = false,
 }: {
   payouts: Payout[]
   paypalConfigured: boolean
   totalOwed: number
+  adminEmail: string
+  approverEmail: string
+  paypalLive?: boolean
 }) {
+  const canApprove =
+    adminEmail.toLowerCase() === approverEmail.toLowerCase()
   const [rows, setRows] = useState(payouts)
   const [editing, setEditing] = useState<number | null>(null)
   const [emailDraft, setEmailDraft] = useState("")
@@ -71,6 +87,19 @@ export function PayoutsPanel({
         })
       } else {
         update(id, { status: "failed" })
+      }
+      setPending(null)
+    })
+  }
+
+  function handleApprove(id: number) {
+    setPending(id)
+    startT(async () => {
+      const res = await approvePayout(id)
+      if (res?.ok) {
+        update(id, { status: "owed", error: null })
+      } else {
+        update(id, { error: res?.error ?? "Could not approve." })
       }
       setPending(null)
     })
@@ -118,13 +147,47 @@ export function PayoutsPanel({
         </div>
       )}
 
+      {paypalConfigured && paypalLive && (
+        <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm">
+          <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-600" />
+          <p className="text-foreground">
+            <span className="font-medium">PayPal LIVE mode active</span> — sending
+            a payout transfers real money to the recipient.
+          </p>
+        </div>
+      )}
+
+      {paypalConfigured && !paypalLive && (
+        <div className="flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm">
+          <AlertCircle className="h-4 w-4 shrink-0 text-amber-600" />
+          <p className="text-foreground">
+            <span className="font-medium">PayPal SANDBOX mode</span> — payouts are
+            test-only. Set{" "}
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">
+              PAYPAL_ENV=live
+            </code>{" "}
+            to send real money.
+          </p>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="text-sm text-muted-foreground">
           <span className="font-semibold text-foreground">
             £{totalOwed}
           </span>{" "}
-          owed across{" "}
-          {rows.filter((r) => r.status === "owed").length} pending payout(s)
+          approved across{" "}
+          {rows.filter((r) => r.status === "owed").length} payout(s) ready to
+          send
+          {rows.filter((r) => r.status === "needs_approval").length > 0 && (
+            <>
+              {" · "}
+              <span className="font-semibold text-orange-600">
+                {rows.filter((r) => r.status === "needs_approval").length}
+              </span>{" "}
+              awaiting approval
+            </>
+          )}
         </div>
         <ExportButton kind="payouts" />
       </div>
@@ -206,7 +269,7 @@ export function PayoutsPanel({
                     variant="secondary"
                     className={statusStyles[r.status] ?? ""}
                   >
-                    {r.status}
+                    {statusLabels[r.status] ?? r.status}
                   </Badge>
                   {r.error && (
                     <div className="mt-1 text-[10px] leading-tight text-muted-foreground">
@@ -215,7 +278,27 @@ export function PayoutsPanel({
                   )}
                 </TableCell>
                 <TableCell className="text-right">
-                  {r.status !== "paid" && (
+                  {r.status === "needs_approval" && (
+                    <div className="flex justify-end gap-1">
+                      {canApprove ? (
+                        <Button
+                          size="sm"
+                          className="h-8 bg-orange-600 text-white hover:bg-orange-700"
+                          disabled={pending === r.id}
+                          onClick={() => handleApprove(r.id)}
+                        >
+                          <ShieldCheck className="mr-1 h-3 w-3" />
+                          Approve £{r.amountGbp}
+                        </Button>
+                      ) : (
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Lock className="h-3 w-3" />
+                          {approverEmail} approves
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {r.status !== "paid" && r.status !== "needs_approval" && (
                     <div className="flex justify-end gap-1">
                       <Button
                         size="sm"

@@ -4,18 +4,26 @@
  * Degrades gracefully: if credentials are missing, returns { skipped: true }.
  */
 
+const env = (key: string) => process.env[key]?.trim() || undefined
+
 export const paypalConfigured = () =>
-  Boolean(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET)
+  Boolean(env("PAYPAL_CLIENT_ID") && env("PAYPAL_CLIENT_SECRET"))
+
+/** True when configured for real (production) payments. */
+export const paypalLive = () =>
+  ["live", "production", "prod"].includes(
+    (env("PAYPAL_ENV") ?? "").toLowerCase(),
+  )
 
 function apiBase() {
-  return process.env.PAYPAL_ENV === "live"
+  return paypalLive()
     ? "https://api-m.paypal.com"
     : "https://api-m.sandbox.paypal.com"
 }
 
 async function getAccessToken() {
   const auth = Buffer.from(
-    `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`,
+    `${env("PAYPAL_CLIENT_ID")}:${env("PAYPAL_CLIENT_SECRET")}`,
   ).toString("base64")
   const res = await fetch(`${apiBase()}/v1/oauth2/token`, {
     method: "POST",

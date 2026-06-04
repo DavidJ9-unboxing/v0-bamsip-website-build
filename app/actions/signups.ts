@@ -18,6 +18,10 @@ import {
   bammerWelcomeEmail,
   venueConfirmEmail,
 } from "@/lib/email-templates"
+import {
+  linkSignupToDirectory,
+  markDirectorySignedUp,
+} from "@/app/actions/directory"
 
 type Result = { ok: boolean; error?: string; referralCode?: string }
 
@@ -168,6 +172,18 @@ export async function registerVenue(input: {
     })
     .returning({ id: venueSignups.id })
 
+  // Try to merge this signup into our researched directory (mark as 'pending').
+  // No outbound contact is triggered from the directory here.
+  try {
+    await linkSignupToDirectory(row.id, {
+      venueName: input.venueName.trim(),
+      email,
+      phone: input.phone?.trim() || null,
+    })
+  } catch (err) {
+    console.error("[v0] linkSignupToDirectory failed:", (err as Error)?.message)
+  }
+
   const confirmUrl = `${getBaseUrl()}/confirm?type=venue&token=${confirmToken}`
   await sendEmail({
     to: email,
@@ -195,7 +211,15 @@ export async function confirmSignup(
       .update(venueSignups)
       .set({ status: "confirmed", confirmedAt: new Date(), confirmToken: null })
       .where(eq(venueSignups.confirmToken, token))
-      .returning({ name: venueSignups.contactName })
+      .returning({ id: venueSignups.id, name: venueSignups.contactName })
+    // Promote any linked directory record to 'signed_up'.
+    if (row) {
+      try {
+        await markDirectorySignedUp(row.id)
+      } catch (err) {
+        console.error("[v0] markDirectorySignedUp failed:", (err as Error)?.message)
+      }
+    }
     return { ok: Boolean(row), name: row?.name }
   }
 

@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Users,
   Store,
+  BookMarked,
   Send,
   PoundSterling,
   Newspaper,
@@ -22,6 +23,7 @@ const links = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/bammers", label: "Bammers", icon: Users },
   { href: "/admin/venues", label: "Venues", icon: Store },
+  { href: "/admin/venues/directory", label: "Directory", icon: BookMarked },
   { href: "/admin/blog", label: "Blog", icon: Newspaper },
   { href: "/admin/social", label: "Social", icon: Share2 },
   { href: "/admin/messages", label: "Messages", icon: Send },
@@ -39,8 +41,12 @@ export function AdminNav({ email }: { email: string }) {
     router.refresh()
   }
 
-  const isActive = (href: string) =>
-    href === "/admin" ? pathname === "/admin" : pathname.startsWith(href)
+  const isActive = (href: string) => {
+    if (href === "/admin") return pathname === "/admin"
+    // "/admin/venues" should not light up while on "/admin/venues/directory"
+    if (href === "/admin/venues") return pathname === "/admin/venues"
+    return pathname.startsWith(href)
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-hairline bg-ink2/90 backdrop-blur">

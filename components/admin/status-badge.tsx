@@ -7,6 +7,9 @@ const STYLES: Record<string, string> = {
   owed: "bg-amber/15 text-amber",
   paid: "bg-success/15 text-success",
   failed: "bg-error/15 text-error",
+  // venue directory lifecycle
+  prospect: "bg-ink3 text-cream2",
+  signed_up: "bg-success/15 text-success",
 }
 
 export function StatusBadge({ status }: { status: string }) {
@@ -17,7 +20,7 @@ export function StatusBadge({ status }: { status: string }) {
         STYLES[status] ?? "bg-ink3 text-cream2",
       )}
     >
-      {status}
+      {status.replace(/_/g, " ")}
     </span>
   )
 }

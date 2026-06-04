@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ArrowRight, Loader2, Check, Copy } from "lucide-react"
+import { PhoneInput } from "@/components/phone-input"
 import { registerBammer, registerVenue } from "@/app/actions/signups"
 
 const bammerSchema = z.object({
@@ -232,7 +233,11 @@ export function SignupForm({ variant, headline }: SignupFormProps) {
           </div>
 
           <div>
-            <Input {...bammerForm.register("phone")} type="tel" placeholder="mobile (optional)" className={fieldClass} />
+            <PhoneInput
+              accent="flame"
+              placeholder="mobile (optional)"
+              onChange={(v) => bammerForm.setValue("phone", v)}
+            />
           </div>
 
           <label className="flex items-start gap-3 rounded-xl border border-hairline bg-ink3 p-3">
@@ -357,7 +362,11 @@ export function SignupForm({ variant, headline }: SignupFormProps) {
         </div>
 
         <div>
-          <Input {...venueForm.register("phone")} type="tel" placeholder="phone (optional)" className={fieldClass} />
+          <PhoneInput
+            accent="amber"
+            placeholder="phone (optional)"
+            onChange={(v) => venueForm.setValue("phone", v)}
+          />
         </div>
 
         <label className="flex items-start gap-3 rounded-xl border border-hairline bg-ink3 p-3">

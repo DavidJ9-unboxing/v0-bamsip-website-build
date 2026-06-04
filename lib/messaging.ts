@@ -1,7 +1,10 @@
 import { db } from "@/lib/db"
 import { messageLog } from "@/lib/db/schema"
 
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? "BamSip <hello@bamsip.com>"
+/** Read an env var with surrounding whitespace stripped (guards against pasted spaces/newlines). */
+const env = (key: string) => process.env[key]?.trim() || undefined
+
+const FROM_EMAIL = env("RESEND_FROM_EMAIL") ?? "BamSip <hello@bamsip.com>"
 
 type LogArgs = {
   recipientType: "bammer" | "venue" | "admin"
@@ -33,12 +36,12 @@ async function log(args: LogArgs) {
   }
 }
 
-export const emailConfigured = () => Boolean(process.env.RESEND_API_KEY)
+export const emailConfigured = () => Boolean(env("RESEND_API_KEY"))
 export const smsConfigured = () =>
   Boolean(
-    process.env.TWILIO_ACCOUNT_SID &&
-      process.env.TWILIO_AUTH_TOKEN &&
-      process.env.TWILIO_FROM_NUMBER,
+    env("TWILIO_ACCOUNT_SID") &&
+      env("TWILIO_AUTH_TOKEN") &&
+      env("TWILIO_FROM_NUMBER"),
   )
 
 /** Send an email via Resend. Degrades gracefully (logs "skipped") if unconfigured. */
@@ -68,7 +71,7 @@ export async function sendEmail(opts: {
 
   try {
     const { Resend } = await import("resend")
-    const resend = new Resend(process.env.RESEND_API_KEY)
+    const resend = new Resend(env("RESEND_API_KEY"))
     const res = await resend.emails.send({
       from: FROM_EMAIL,
       to: opts.to,
@@ -109,12 +112,9 @@ export async function sendSms(opts: {
 
   try {
     const twilio = (await import("twilio")).default
-    const client = twilio(
-      process.env.TWILIO_ACCOUNT_SID,
-      process.env.TWILIO_AUTH_TOKEN,
-    )
+    const client = twilio(env("TWILIO_ACCOUNT_SID"), env("TWILIO_AUTH_TOKEN"))
     await client.messages.create({
-      from: process.env.TWILIO_FROM_NUMBER,
+      from: env("TWILIO_FROM_NUMBER"),
       to: opts.to,
       body: opts.body,
     })

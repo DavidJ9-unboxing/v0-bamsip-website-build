@@ -17,20 +17,24 @@ export function Header() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-hairline bg-ink/70 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 md:grid md:grid-cols-[1fr_auto_1fr]">
         <BamSipLogo size="md" />
 
-        {/* Desktop nav */}
-        <nav className="hidden items-center gap-8 md:flex">
+        {/* Desktop nav (centered) */}
+        <nav className="hidden items-center justify-center gap-10 md:flex">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="rounded text-sm text-cream2 outline-none transition-colors hover:text-cream focus-visible:ring-2 focus-visible:ring-flame"
+              className="rounded text-base font-bold text-cream2 outline-none transition-colors hover:text-cream focus-visible:ring-2 focus-visible:ring-flame"
             >
               {link.label}
             </Link>
           ))}
+        </nav>
+
+        {/* Desktop CTA (right) */}
+        <div className="hidden md:flex md:justify-end">
           <Link
             href="/#waitlist"
             className="inline-flex items-center gap-1.5 rounded-full bg-flame px-4 py-2 text-sm font-semibold text-cream outline-none transition-all hover:bg-flame-soft focus-visible:ring-2 focus-visible:ring-flame focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
@@ -38,7 +42,7 @@ export function Header() {
             join waitlist
             <ArrowRight className="h-4 w-4" />
           </Link>
-        </nav>
+        </div>
 
         {/* Mobile toggle */}
         <button

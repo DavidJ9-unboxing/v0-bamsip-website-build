@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { ArrowRight, Timer, Wallet, BarChart3, SlidersHorizontal } from "lucide-react"
+import { Timer, Wallet, BarChart3, SlidersHorizontal } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { HeroBackground } from "@/components/hero-background"
@@ -110,21 +110,12 @@ export function VenuesContent() {
               </span>
               <h1 className="mt-5 font-display text-5xl font-bold leading-[0.95] tracking-tight text-balance text-cream sm:text-6xl lg:text-7xl">
                 <span className="lowercase">fill your </span>
-                <span className="lowercase text-flame">dead nights.</span>
+                <span className="lowercase text-amber">dead nights.</span>
               </h1>
               <p className="mx-auto mt-5 max-w-xl text-lg text-cream2">
                 the operator&apos;s tool for live offers, pre-sold drinks, and
                 real attribution. push a deal in 15 seconds.
               </p>
-              <div className="mt-8 flex justify-center">
-                <Link
-                  href="#interest"
-                  className="inline-flex items-center gap-2 rounded-full bg-flame px-6 py-3 text-sm font-semibold text-cream outline-none transition-all hover:bg-flame-soft focus-visible:ring-2 focus-visible:ring-flame focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
-                >
-                  register interest
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
             </motion.div>
           </div>
 
@@ -219,6 +210,25 @@ export function VenuesContent() {
       </section>
 
       <Footer />
+
+      {/* Floating CTA — the only persistent CTA on this page */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
+        className="fixed bottom-5 right-5 z-50 sm:bottom-6 sm:right-6"
+      >
+        <Link
+          href="#interest"
+          className="inline-flex items-center gap-2 rounded-full bg-amber px-6 py-3.5 text-sm font-semibold text-ink shadow-lg shadow-amber/30 outline-none transition-all hover:bg-amber-soft hover:shadow-amber/50 focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+        >
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ink/60 opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-ink" />
+          </span>
+          register interest
+        </Link>
+      </motion.div>
     </div>
   )
 }

@@ -49,11 +49,16 @@ interface SignupFormProps {
   headline?: string
 }
 
-const fieldClass =
-  "bg-ink3 border-hairline text-cream placeholder:text-mute h-12 rounded-xl focus:border-flame focus:ring-flame"
 const labelClass = "mb-1.5 block text-xs font-medium text-cream2"
 
 export function SignupForm({ variant, headline }: SignupFormProps) {
+  const isVenue = variant === "venue"
+  const fieldClass = isVenue
+    ? "bg-ink3 border-hairline text-cream placeholder:text-mute h-12 rounded-xl focus:border-amber focus:ring-amber"
+    : "bg-ink3 border-hairline text-cream placeholder:text-mute h-12 rounded-xl focus:border-flame focus:ring-flame"
+  const textareaClass = isVenue
+    ? "min-h-[72px] rounded-xl border-hairline bg-ink3 text-cream placeholder:text-mute focus:border-amber focus:ring-amber"
+    : "min-h-[72px] rounded-xl border-hairline bg-ink3 text-cream placeholder:text-mute focus:border-flame focus:ring-flame"
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [shareUrl, setShareUrl] = useState<string | null>(null)
@@ -406,14 +411,14 @@ export function SignupForm({ variant, headline }: SignupFormProps) {
           <Textarea
             {...venueForm.register("challenge")}
             placeholder="e.g. midweek footfall, standing out..."
-            className="min-h-[72px] rounded-xl border-hairline bg-ink3 text-cream placeholder:text-mute focus:border-flame focus:ring-flame"
+            className={textareaClass}
           />
         </div>
 
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="h-12 w-full rounded-xl bg-flame text-base font-semibold text-cream transition-all hover:bg-flame-soft"
+          className="h-12 w-full rounded-xl bg-amber text-base font-semibold text-ink transition-all hover:bg-amber-soft"
         >
           {isSubmitting ? (
             <Loader2 className="h-5 w-5 animate-spin" />

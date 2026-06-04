@@ -11,6 +11,8 @@ import {
   Store,
   Send,
   PoundSterling,
+  Newspaper,
+  Share2,
   LogOut,
   Menu,
   X,
@@ -20,6 +22,8 @@ const links = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/bammers", label: "Bammers", icon: Users },
   { href: "/admin/venues", label: "Venues", icon: Store },
+  { href: "/admin/blog", label: "Blog", icon: Newspaper },
+  { href: "/admin/social", label: "Social", icon: Share2 },
   { href: "/admin/messages", label: "Messages", icon: Send },
   { href: "/admin/payouts", label: "Payouts", icon: PoundSterling },
 ]

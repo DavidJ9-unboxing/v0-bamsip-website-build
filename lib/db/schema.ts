@@ -127,3 +127,52 @@ export const messageLog = pgTable("message_log", {
   error: text("error"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 })
+
+/* ------------------------- Blog & social content ------------------------ */
+
+export const blogPosts = pgTable("blog_posts", {
+  id: serial("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  excerpt: text("excerpt"),
+  content: text("content").notNull().default(""),
+  coverImage: text("cover_image"),
+  category: text("category").notNull().default("whats-on"),
+  author: text("author").notNull().default("BamSip"),
+  sourceName: text("source_name"),
+  sourceUrl: text("source_url"),
+  status: text("status").notNull().default("draft"),
+  featured: boolean("featured").notNull().default(false),
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+})
+
+export const socialAccounts = pgTable("social_accounts", {
+  id: serial("id").primaryKey(),
+  platform: text("platform").notNull().unique(),
+  handle: text("handle"),
+  displayName: text("display_name"),
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token"),
+  connected: boolean("connected").notNull().default(false),
+  autoPublish: boolean("auto_publish").notNull().default(false),
+  lastSyncedAt: timestamp("last_synced_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+})
+
+export const socialPosts = pgTable("social_posts", {
+  id: serial("id").primaryKey(),
+  postId: integer("post_id"),
+  platform: text("platform").notNull(),
+  caption: text("caption"),
+  mediaUrl: text("media_url"),
+  linkUrl: text("link_url"),
+  status: text("status").notNull().default("draft"),
+  externalId: text("external_id"),
+  scheduledFor: timestamp("scheduled_for"),
+  publishedAt: timestamp("published_at"),
+  error: text("error"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+})

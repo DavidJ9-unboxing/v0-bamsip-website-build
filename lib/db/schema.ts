@@ -101,6 +101,47 @@ export const venueSignups = pgTable("venue_signups", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 })
 
+/**
+ * venue_directory holds venues we've researched (prospects) — this is OUR record,
+ * not a sign-up. Lifecycle: prospect -> pending -> signed_up.
+ * When a venue submits the sign-up form we try to merge it into the matching
+ * directory row and link it via signupId.
+ *
+ * Phone notes: `phone`/`phoneSecondary` are mostly landlines from research.
+ * `mobile`/`mobileSecondary` are reserved for SMS-capable numbers we collect later.
+ * No outbound contact happens from this table until status is at least 'pending'.
+ */
+export const venueDirectory = pgTable("venue_directory", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  category: text("category"),
+  address: text("address"),
+  website: text("website"),
+  instagram: text("instagram"),
+  facebook: text("facebook"),
+  owner: text("owner"),
+  role: text("role"),
+  contactUrl: text("contact_url"),
+  source: text("source"),
+  confidence: text("confidence"),
+  description: text("description"),
+  // landlines from research
+  phone: text("phone"),
+  phoneSecondary: text("phone_secondary"),
+  // SMS-capable numbers collected later
+  mobile: text("mobile"),
+  mobileSecondary: text("mobile_secondary"),
+  smsOptIn: boolean("sms_opt_in").notNull().default(false),
+  email: text("email"),
+  // prospect | pending | signed_up
+  status: text("status").notNull().default("prospect"),
+  signupId: integer("signup_id"),
+  notes: text("notes"),
+  importedAt: timestamp("imported_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+})
+
 export const payouts = pgTable("payouts", {
   id: serial("id").primaryKey(),
   bammerId: integer("bammer_id").notNull(),

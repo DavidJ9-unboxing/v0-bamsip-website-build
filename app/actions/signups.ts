@@ -9,6 +9,8 @@ import {
   getBaseUrl,
   REFERRAL_THRESHOLD,
   PAYOUT_AMOUNT_GBP,
+  AUTO_APPROVE_CAP_GBP,
+  PAYOUT_APPROVER_EMAIL,
 } from "@/lib/referral"
 import { sendEmail, sendSms } from "@/lib/messaging"
 import {
@@ -260,14 +262,80 @@ async function maybeCreatePayout(referrerCode: string) {
     .from(payouts)
     .where(eq(payouts.bammerId, referrer.id))
 
+  // Cumulative amount this Bammer has already been auto-approved or paid.
+  // needs_approval rows don't count until the approver signs off on them.
+  const [{ approvedTotal }] = await db
+    .select({
+      approvedTotal: sql<number>`coalesce(sum(${payouts.amountGbp}) filter (where ${payouts.status} in ('owed','paid')), 0)::int`,
+    })
+    .from(payouts)
+    .where(eq(payouts.bammerId, referrer.id))
+
+  let runningApproved = Number(approvedTotal)
+
   const toCreate = earnedBlocks - Number(existingPayouts)
   for (let i = 0; i < toCreate; i++) {
+    // No PayPal email on file → we can't pay regardless, so collect details first.
+    if (!referrer.paypalEmail) {
+      await db.insert(payouts).values({
+        bammerId: referrer.id,
+        paypalEmail: "",
+        amountGbp: PAYOUT_AMOUNT_GBP,
+        referralsSnapshot: Number(count),
+        status: "needs_details",
+      })
+      continue
+    }
+
+    const withinCap = runningApproved + PAYOUT_AMOUNT_GBP <= AUTO_APPROVE_CAP_GBP
+    const status = withinCap ? "owed" : "needs_approval"
+
     await db.insert(payouts).values({
       bammerId: referrer.id,
-      paypalEmail: referrer.paypalEmail ?? "",
+      paypalEmail: referrer.paypalEmail,
       amountGbp: PAYOUT_AMOUNT_GBP,
       referralsSnapshot: Number(count),
-      status: referrer.paypalEmail ? "owed" : "needs_details",
+      status,
     })
+
+    if (withinCap) {
+      // Counts toward the auto-approved cap.
+      runningApproved += PAYOUT_AMOUNT_GBP
+    } else {
+      // Over the cap — ask the approver to sign off.
+      await notifyApproverOfPayout({
+        bammerName: referrer.email,
+        bammerEmail: referrer.email,
+        amountGbp: PAYOUT_AMOUNT_GBP,
+        approvedTotal: runningApproved,
+      })
+    }
   }
+}
+
+/** Emails the designated approver that an over-cap payout is awaiting sign-off. */
+async function notifyApproverOfPayout(opts: {
+  bammerName: string
+  bammerEmail: string
+  amountGbp: number
+  approvedTotal: number
+}) {
+  const approveUrl = `${getBaseUrl()}/admin/payouts`
+  await sendEmail({
+    to: PAYOUT_APPROVER_EMAIL,
+    subject: `Payout approval needed — ${opts.bammerEmail}`,
+    recipientType: "venue",
+    template: "payout-approval",
+    html: `
+      <p>A referral payout needs your approval because it would take this Bammer over the £${AUTO_APPROVE_CAP_GBP} auto-approval cap.</p>
+      <ul>
+        <li><strong>Bammer:</strong> ${opts.bammerEmail}</li>
+        <li><strong>This reward:</strong> £${opts.amountGbp}</li>
+        <li><strong>Already auto-approved:</strong> £${opts.approvedTotal}</li>
+      </ul>
+      <p><a href="${approveUrl}">Review &amp; approve in the admin payouts panel</a></p>
+      <p>Only ${PAYOUT_APPROVER_EMAIL} can approve over-cap payouts.</p>
+    `,
+    text: `Payout approval needed for ${opts.bammerEmail}: £${opts.amountGbp} (already auto-approved £${opts.approvedTotal}, cap £${AUTO_APPROVE_CAP_GBP}). Approve at ${approveUrl}`,
+  })
 }

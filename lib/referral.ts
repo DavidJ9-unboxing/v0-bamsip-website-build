@@ -19,6 +19,16 @@ export function generateToken() {
 export const REFERRAL_THRESHOLD = 50
 export const PAYOUT_AMOUNT_GBP = 5
 
+/**
+ * Rewards auto-approve (ready to send) until a single Bammer's cumulative
+ * approved/paid total reaches this cap. Anything beyond it is held as
+ * "needs_approval" until the approver signs off.
+ */
+export const AUTO_APPROVE_CAP_GBP = 10
+
+/** Only this person can approve over-cap payouts. */
+export const PAYOUT_APPROVER_EMAIL = "natan@bamsip.com"
+
 /** Base URL for building shareable links + confirmation links. */
 export function getBaseUrl() {
   return (

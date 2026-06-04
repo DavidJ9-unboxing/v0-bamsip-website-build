@@ -17,8 +17,9 @@ import {
   sendPayoutNow,
   markPayoutPaid,
   setPayoutPaypalEmail,
+  approvePayout,
 } from "@/app/actions/admin"
-import { Check, Send, Pencil, AlertCircle } from "lucide-react"
+import { Check, Send, Pencil, AlertCircle, ShieldCheck, Lock } from "lucide-react"
 
 type Payout = {
   id: number
@@ -38,17 +39,30 @@ const statusStyles: Record<string, string> = {
   owed: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
   paid: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400",
   failed: "bg-red-500/15 text-red-700 dark:text-red-400",
+  needs_approval: "bg-orange-500/15 text-orange-700 dark:text-orange-400",
+  needs_details: "bg-muted text-muted-foreground",
+}
+
+const statusLabels: Record<string, string> = {
+  needs_approval: "needs approval",
+  needs_details: "needs details",
 }
 
 export function PayoutsPanel({
   payouts,
   paypalConfigured,
   totalOwed,
+  adminEmail,
+  approverEmail,
 }: {
   payouts: Payout[]
   paypalConfigured: boolean
   totalOwed: number
+  adminEmail: string
+  approverEmail: string
 }) {
+  const canApprove =
+    adminEmail.toLowerCase() === approverEmail.toLowerCase()
   const [rows, setRows] = useState(payouts)
   const [editing, setEditing] = useState<number | null>(null)
   const [emailDraft, setEmailDraft] = useState("")
@@ -71,6 +85,19 @@ export function PayoutsPanel({
         })
       } else {
         update(id, { status: "failed" })
+      }
+      setPending(null)
+    })
+  }
+
+  function handleApprove(id: number) {
+    setPending(id)
+    startT(async () => {
+      const res = await approvePayout(id)
+      if (res?.ok) {
+        update(id, { status: "owed", error: null })
+      } else {
+        update(id, { error: res?.error ?? "Could not approve." })
       }
       setPending(null)
     })
@@ -123,8 +150,18 @@ export function PayoutsPanel({
           <span className="font-semibold text-foreground">
             £{totalOwed}
           </span>{" "}
-          owed across{" "}
-          {rows.filter((r) => r.status === "owed").length} pending payout(s)
+          approved across{" "}
+          {rows.filter((r) => r.status === "owed").length} payout(s) ready to
+          send
+          {rows.filter((r) => r.status === "needs_approval").length > 0 && (
+            <>
+              {" · "}
+              <span className="font-semibold text-orange-600">
+                {rows.filter((r) => r.status === "needs_approval").length}
+              </span>{" "}
+              awaiting approval
+            </>
+          )}
         </div>
         <ExportButton kind="payouts" />
       </div>
@@ -206,7 +243,7 @@ export function PayoutsPanel({
                     variant="secondary"
                     className={statusStyles[r.status] ?? ""}
                   >
-                    {r.status}
+                    {statusLabels[r.status] ?? r.status}
                   </Badge>
                   {r.error && (
                     <div className="mt-1 text-[10px] leading-tight text-muted-foreground">
@@ -215,7 +252,27 @@ export function PayoutsPanel({
                   )}
                 </TableCell>
                 <TableCell className="text-right">
-                  {r.status !== "paid" && (
+                  {r.status === "needs_approval" && (
+                    <div className="flex justify-end gap-1">
+                      {canApprove ? (
+                        <Button
+                          size="sm"
+                          className="h-8 bg-orange-600 text-white hover:bg-orange-700"
+                          disabled={pending === r.id}
+                          onClick={() => handleApprove(r.id)}
+                        >
+                          <ShieldCheck className="mr-1 h-3 w-3" />
+                          Approve £{r.amountGbp}
+                        </Button>
+                      ) : (
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Lock className="h-3 w-3" />
+                          {approverEmail} approves
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {r.status !== "paid" && r.status !== "needs_approval" && (
                     <div className="flex justify-end gap-1">
                       <Button
                         size="sm"

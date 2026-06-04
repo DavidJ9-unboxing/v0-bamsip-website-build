@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { ArrowRight, Timer, Wallet, BarChart3, SlidersHorizontal } from "lucide-react"
+import { Timer, Wallet, BarChart3, SlidersHorizontal } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { HeroBackground } from "@/components/hero-background"
@@ -116,15 +116,6 @@ export function VenuesContent() {
                 the operator&apos;s tool for live offers, pre-sold drinks, and
                 real attribution. push a deal in 15 seconds.
               </p>
-              <div className="mt-8 flex justify-center">
-                <Link
-                  href="#interest"
-                  className="inline-flex items-center gap-2 rounded-full bg-amber px-6 py-3 text-sm font-semibold text-ink outline-none transition-all hover:bg-amber-soft focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
-                >
-                  register interest
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
             </motion.div>
           </div>
 

@@ -226,7 +226,7 @@ export function BammersContent() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cream/70 opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-cream" />
           </span>
-          register interest
+          join the wait list
         </Link>
       </motion.div>
     </div>

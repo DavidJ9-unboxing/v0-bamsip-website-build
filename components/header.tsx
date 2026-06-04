@@ -9,6 +9,7 @@ import { BamSipLogo } from "./bamsip-logo"
 const navLinks = [
   { label: "for bammers", href: "/bammers" },
   { label: "for venues", href: "/venues" },
+  { label: "blog", href: "/blog" },
   { label: "faq", href: "/#faq" },
 ]
 

@@ -10,7 +10,6 @@ import { HeroBackground } from "@/components/hero-background"
 import { VenueDashboard } from "@/components/venue-dashboard"
 import { FeatureGrid } from "@/components/feature-grid"
 import { HowItWorks } from "@/components/how-it-works"
-import { PlannedEvents } from "@/components/planned-events"
 import { FAQ } from "@/components/faq"
 import { SocialProof } from "@/components/social-proof"
 import { SignupForm } from "@/components/signup-form"
@@ -188,9 +187,6 @@ export function VenuesContent() {
       </section>
 
       <HowItWorks steps={howItWorksSteps} />
-
-      {/* Flagship product — planned bammer events as a revenue driver */}
-      <PlannedEvents accent="amber" />
 
       <SocialProof variant="full" />
 

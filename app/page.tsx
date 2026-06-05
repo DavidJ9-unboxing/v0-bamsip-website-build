@@ -3,30 +3,10 @@ import { Footer } from "@/components/footer"
 import { HomeHero } from "@/components/home-hero"
 import { GalleryMarquee } from "@/components/gallery-marquee"
 import { SplitChooser } from "@/components/split-chooser"
-import { DemoSection } from "@/components/demo-section"
-import { HowItWorks } from "@/components/how-it-works"
 import { VenuesTeaser } from "@/components/venues-teaser"
 import { TrustBand } from "@/components/trust-band"
 import { FAQ } from "@/components/faq"
 import { FinalCta } from "@/components/final-cta"
-
-const howItWorksSteps = [
-  {
-    number: 1,
-    headline: "see what's on, and what's hot",
-    body: "a live map of deals near you right now, plus events and bammer-only nights worth planning for.",
-  },
-  {
-    number: 2,
-    headline: "lock it in with mates",
-    body: "grab your spot, pre-buy your drinks at a discount, share the plan to the group.",
-  },
-  {
-    number: 3,
-    headline: "turn up and tap",
-    body: "hold your phone to the reader at the bar. sorted — now enjoy the night.",
-  },
-]
 
 const faqItems = [
   {
@@ -89,8 +69,6 @@ export default function HomePage() {
         <HomeHero />
         <GalleryMarquee />
         <SplitChooser />
-        <DemoSection />
-        <HowItWorks steps={howItWorksSteps} />
         <VenuesTeaser />
         <TrustBand />
         <div id="faq" className="scroll-mt-16">

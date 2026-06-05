@@ -13,7 +13,7 @@ import {
   formatDate,
 } from "@/lib/blog"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 3600
 
 export async function generateMetadata({
   params,
@@ -26,11 +26,28 @@ export async function generateMetadata({
   return {
     title: `${post.title} — BamSip`,
     description: post.excerpt ?? undefined,
+    alternates: {
+      canonical: `/blog/${post.slug}`,
+    },
     openGraph: {
       title: post.title,
       description: post.excerpt ?? undefined,
+      url: `/blog/${post.slug}`,
       images: post.coverImage ? [{ url: post.coverImage }] : undefined,
       type: "article",
+      publishedTime: post.publishedAt
+        ? new Date(post.publishedAt).toISOString()
+        : undefined,
+      modifiedTime: post.updatedAt
+        ? new Date(post.updatedAt).toISOString()
+        : undefined,
+      authors: post.author ? [post.author] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt ?? undefined,
+      images: post.coverImage ? [post.coverImage] : undefined,
     },
   }
 }
@@ -48,8 +65,42 @@ export default async function ArticlePage({
     .filter((p) => p.id !== post.id)
     .slice(0, 3)
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://bamsip.com"
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: post.title,
+    description: post.excerpt ?? undefined,
+    image: post.coverImage ? [post.coverImage] : undefined,
+    datePublished: post.publishedAt
+      ? new Date(post.publishedAt).toISOString()
+      : undefined,
+    dateModified: post.updatedAt
+      ? new Date(post.updatedAt).toISOString()
+      : undefined,
+    author: post.author
+      ? { "@type": "Person", name: post.author }
+      : undefined,
+    publisher: {
+      "@type": "Organization",
+      name: "BamSip",
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteUrl}/icon.png`,
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${siteUrl}/blog/${post.slug}`,
+    },
+  }
+
   return (
     <div className="min-h-screen bg-ink">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       <Header />
 
       <main className="pb-20 pt-24">

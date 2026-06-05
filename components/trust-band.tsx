@@ -8,9 +8,7 @@ const markers = [
   { icon: Users, text: "Built with nightlife operators." },
   {
     icon: ShieldCheck,
-    // NOTE: Sacha Lord / NTIA involvement is PLACEHOLDER copy pending approval.
-    // Do not treat as confirmed or final public messaging.
-    text: "Sacha Lord & UK NTIA involvement, subject to approval.",
+    text: "Sacha Lord is an advisor to BamSip.",
   },
 ]
 

@@ -10,6 +10,7 @@ import {
   Area,
   AreaChart,
   Tooltip,
+  Legend,
 } from "recharts"
 
 const PALETTE = ["#FF6B54", "#FFB547", "#34D399", "#FF8A78", "#FFC97A", "#7C3AED"]
@@ -34,10 +35,27 @@ const LABELS: Record<string, string> = {
   "boost-midweek": "Boost midweek",
   data: "Customer insight",
   unknown: "Not specified",
+  // analytics: device + traffic source
+  mobile: "Mobile",
+  desktop: "Desktop",
+  tablet: "Tablet",
+  Direct: "Direct",
+  Unknown: "Unknown",
 }
 
+let regionNames: Intl.DisplayNames | null = null
 function pretty(label: string) {
-  return LABELS[label] ?? label
+  if (LABELS[label]) return LABELS[label]
+  // 2-letter ISO country code -> readable country name
+  if (/^[A-Z]{2}$/.test(label)) {
+    try {
+      regionNames ??= new Intl.DisplayNames(["en"], { type: "region" })
+      return regionNames.of(label) ?? label
+    } catch {
+      return label
+    }
+  }
+  return label
 }
 
 export function BreakdownChart({
@@ -135,6 +153,74 @@ export function TrendChart({
           stroke="#FF6B54"
           strokeWidth={2}
           fill="url(#flameFill)"
+        />
+      </AreaChart>
+    </ResponsiveContainer>
+  )
+}
+
+export function VisitsTrendChart({
+  data,
+}: {
+  data: { day: string; count: number; visitors: number }[]
+}) {
+  if (!data.length) {
+    return <p className="py-8 text-center text-sm text-mute">No visits yet.</p>
+  }
+  return (
+    <ResponsiveContainer width="100%" height={260}>
+      <AreaChart data={data} margin={{ left: 0, right: 8, top: 8, bottom: 0 }}>
+        <defs>
+          <linearGradient id="viewsFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#FF6B54" stopOpacity={0.45} />
+            <stop offset="100%" stopColor="#FF6B54" stopOpacity={0} />
+          </linearGradient>
+          <linearGradient id="visitorsFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#FFB547" stopOpacity={0.35} />
+            <stop offset="100%" stopColor="#FFB547" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <XAxis
+          dataKey="day"
+          tick={{ fill: "#9A9AA8", fontSize: 11 }}
+          axisLine={false}
+          tickLine={false}
+          tickFormatter={(v: string) => v.slice(5)}
+        />
+        <YAxis
+          tick={{ fill: "#9A9AA8", fontSize: 11 }}
+          axisLine={false}
+          tickLine={false}
+          allowDecimals={false}
+          width={28}
+        />
+        <Tooltip
+          contentStyle={{
+            background: "#1C1C24",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 12,
+            color: "#fff",
+          }}
+        />
+        <Legend
+          wrapperStyle={{ fontSize: 12, color: "#9A9AA8" }}
+          iconType="circle"
+        />
+        <Area
+          type="monotone"
+          name="Page views"
+          dataKey="count"
+          stroke="#FF6B54"
+          strokeWidth={2}
+          fill="url(#viewsFill)"
+        />
+        <Area
+          type="monotone"
+          name="Unique visitors"
+          dataKey="visitors"
+          stroke="#FFB547"
+          strokeWidth={2}
+          fill="url(#visitorsFill)"
         />
       </AreaChart>
     </ResponsiveContainer>

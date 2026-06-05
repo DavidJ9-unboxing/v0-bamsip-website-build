@@ -14,6 +14,7 @@ import {
   PoundSterling,
   Newspaper,
   Share2,
+  BarChart3,
   LogOut,
   Menu,
   X,
@@ -21,6 +22,7 @@ import {
 
 const links = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
+  { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin/bammers", label: "Bammers", icon: Users },
   { href: "/admin/venues", label: "Venues", icon: Store },
   { href: "/admin/venues/directory", label: "Directory", icon: BookMarked },

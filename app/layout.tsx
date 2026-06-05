@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next"
 import { Inter, Space_Grotesk } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
+import { Suspense } from "react"
+import { PageViewTracker } from "@/components/analytics/page-view-tracker"
 import "./globals.css"
 
 const inter = Inter({
@@ -59,6 +61,9 @@ export default function RootLayout({
     >
       <body className="font-sans antialiased min-h-screen bg-ink text-cream">
         {children}
+        <Suspense fallback={null}>
+          <PageViewTracker />
+        </Suspense>
         {process.env.NODE_ENV === "production" && <Analytics />}
       </body>
     </html>

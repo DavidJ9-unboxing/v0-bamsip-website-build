@@ -21,7 +21,7 @@ export function HomeHero() {
           >
             <span className="inline-flex items-center gap-2 rounded-full border border-flame/30 bg-flame/10 px-3 py-1 text-xs font-medium text-flame backdrop-blur">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-flame" />
-              Manchester rollout — now onboarding
+              Manchester rollout, now onboarding
             </span>
             <h1 className="mt-5 font-display text-5xl font-bold leading-[0.95] tracking-tight text-balance text-cream sm:text-6xl lg:text-7xl">
               <span className="lowercase">smarter </span>
@@ -29,7 +29,7 @@ export function HomeHero() {
             </h1>
             <p className="mx-auto mt-5 max-w-md text-lg leading-relaxed text-cream2 lg:mx-0">
               see where the best deals are right now, plus events and bammer-only
-              nights worth planning for — with your drinks pre-bought for less
+              nights worth planning for, with your drinks pre-bought for less
               before you head out.
             </p>
 

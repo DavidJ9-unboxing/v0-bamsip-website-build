@@ -18,7 +18,7 @@ const steps = [
   {
     icon: BadgePoundSterling,
     title: "we send you £5",
-    body: "paid straight to your PayPal. every 50 mates earns another £5 — no cap.",
+    body: "paid straight to your PayPal. every 50 mates earns another £5. no cap.",
   },
 ]
 
@@ -43,7 +43,7 @@ export function ReferralOffer() {
             </h2>
             <p className="max-w-md text-cream2">
               spread the word and we&apos;ll pay you for it. refer 50 friends who
-              join, earn a fiver — do it again, earn another. simple.
+              join, earn a fiver. do it again, earn another. simple.
             </p>
           </div>
 

@@ -49,8 +49,8 @@ const sampleEvents = [
     name: "Cocktail Masterclass & Late",
     cadence: "monthly, midweek",
     blurb:
-      "a hands-on masterclass with the bar team, then the room turns into the night — drinks deals run till close.",
-    venueWin: "fills a dead Tuesday",
+      "a hands-on masterclass with the bar team, then the room turns into the night. drinks deals run till close.",
+    venueWin: "fills a quiet Tuesday",
     bammerWin: "two cocktails made + kept",
   },
   {
@@ -68,7 +68,7 @@ const venueWins = [
   {
     icon: CalendarCheck2,
     title: "guaranteed bookings",
-    body: "tickets and drinks bundles are pre-sold before the doors open — the night is funded before it starts.",
+    body: "tickets and drinks bundles are pre-sold before the doors open. the night is funded before it starts.",
   },
   {
     icon: TrendingUp,
@@ -81,7 +81,7 @@ const bammerWins = [
   {
     icon: Ticket,
     title: "a night worth planning for",
-    body: "curated line-ups, themed rooms and member-only deals — not just whatever's open on the night.",
+    body: "curated line-ups, themed rooms and member-only deals. not just whatever's open on the night.",
   },
   {
     icon: ShieldCheck,
@@ -110,7 +110,7 @@ export function PlannedEvents({ accent = "flame" }: { accent?: Accent }) {
             the nights everyone wins.
           </h2>
           <p className="mt-4 text-cream2">
-            curated, recurring nights built with our venues — pre-sold so the bar
+            curated, recurring nights built with our venues. pre-sold so the bar
             fills, and locked-in so the night lands. revenue for the venue, a
             near-guaranteed great time for the bammers.
           </p>

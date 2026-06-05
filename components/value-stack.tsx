@@ -65,7 +65,7 @@ export function ValueStack() {
             </span>
             <span className="mt-1 text-sm text-cream2">
               free to download. free to use. you only pay for the drinks you
-              choose — at a discount.
+              choose, at a discount.
             </span>
           </div>
         </motion.div>

@@ -234,7 +234,7 @@ export function SignupForm({ variant, headline }: SignupFormProps) {
         )}
         {referredBy && (
           <p className="mb-4 rounded-lg border border-flame/30 bg-flame/10 px-3 py-2 text-center text-xs text-cream2">
-            a mate invited you — nice. you&apos;re both sorted.
+            A mate invited you. Nice. You&apos;re both sorted.
           </p>
         )}
         <form onSubmit={bammerForm.handleSubmit(onSubmitBammer)} className="space-y-4">

@@ -7,7 +7,7 @@ const pains = [
   {
     icon: CalendarX,
     title: "you miss the good stuff",
-    body: "the deal two streets away, the gig, the night everyone talks about after — you always hear too late.",
+    body: "the deal two streets away, the gig, the night everyone talks about after. you always hear too late.",
   },
   {
     icon: Wallet,

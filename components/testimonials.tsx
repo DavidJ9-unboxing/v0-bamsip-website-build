@@ -11,7 +11,7 @@ const testimonials = [
     name: "Maya",
     detail: "Northern Quarter regular",
     quote:
-      "Got us into a bammer-only live set before tickets even went public. The whole crew came — best night we've had in ages.",
+      "Got us into a bammer-only live set before tickets even went public. The whole crew came. Best night we've had in ages.",
   },
   {
     initial: "J",

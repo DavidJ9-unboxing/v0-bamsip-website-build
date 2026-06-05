@@ -43,7 +43,7 @@ export function SocialProof({ variant = "compact" }: SocialProofProps) {
     <section className="bg-ink2 px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-4xl flex-col items-center gap-2 text-center">
         <p className="text-sm text-cream2">
-          Manchester rollout now onboarding — built with nightlife operators.
+          Manchester rollout now onboarding. Built with nightlife operators.
         </p>
         <p className="text-xs text-mute">
           Sacha Lord is an advisor to BamSip.

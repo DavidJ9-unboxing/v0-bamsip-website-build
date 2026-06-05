@@ -8,7 +8,7 @@ const milestones = [
     when: "July",
     title: "the first night",
     place: "Manchester",
-    body: "our launch event kicks off in a Manchester venue — bammer-only, drinks pre-bought, the whole thing sorted.",
+    body: "our launch event kicks off in a Manchester venue. bammer-only, drinks pre-bought, the whole thing sorted.",
     highlight: true,
   },
   {
@@ -21,7 +21,7 @@ const milestones = [
     when: "Sept",
     title: "gearing up",
     place: "the big push",
-    body: "students back, nights drawing in — we ramp up events and open the doors to more bammers.",
+    body: "students back, nights drawing in. we ramp up events and open the doors to more bammers.",
   },
   {
     when: "Dec",

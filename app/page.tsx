@@ -12,12 +12,12 @@ const faqItems = [
   {
     question: "When is BamSip available?",
     answer:
-      "Manchester first — we're onboarding venues now ahead of the rollout. Drop your city when you sign up and we'll let you know when we land near you.",
+      "Manchester first. We're onboarding venues now ahead of the rollout. Drop your city when you sign up and we'll let you know when we land near you.",
   },
   {
     question: "Is BamSip free to use?",
     answer:
-      "Yes. Free to download, free to use. You only pay for the drinks you pre-buy — at a discount.",
+      "Yes. Free to download, free to use. You only pay for the drinks you pre-buy, at a discount.",
   },
   {
     question: "How do flash deals work?",
@@ -32,12 +32,12 @@ const faqItems = [
   {
     question: "What if my venue isn't listed?",
     answer:
-      "Tell us — there's a request field after you sign up. We're adding Manchester venues every week.",
+      "Tell us. There's a request field after you sign up. We're adding Manchester venues every week.",
   },
   {
     question: "What does BamSip cost a venue?",
     answer:
-      "We're finalising pricing before launch — likely a share of redemptions, no monthly fee. Register interest to be part of the conversation.",
+      "We're finalising pricing before launch: likely a share of redemptions, no monthly fee. Register interest to be part of the conversation.",
   },
   {
     question: "Do venues control pricing?",
@@ -57,7 +57,7 @@ const faqItems = [
   {
     question: "Who owns the customer relationship?",
     answer:
-      "The venue does. BamSip is the channel — customers redeem at your bar, your way.",
+      "The venue does. BamSip is the channel. Customers redeem at your bar, your way.",
   },
 ]
 

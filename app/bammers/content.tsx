@@ -35,7 +35,7 @@ const howItWorksSteps = [
   {
     number: 3,
     headline: "turn up and tap",
-    body: "hold your phone to the reader at the bar. sorted — now enjoy the night.",
+    body: "hold your phone to the reader at the bar. sorted. now enjoy the night.",
   },
 ]
 
@@ -43,12 +43,12 @@ const faqItems = [
   {
     question: "When is BamSip available?",
     answer:
-      "Manchester first — we're onboarding venues now. Drop your city when you register and we'll let you know when we land near you.",
+      "Manchester first. We're onboarding venues now. Drop your city when you register and we'll let you know when we land near you.",
   },
   {
     question: "Is BamSip free to use?",
     answer:
-      "Yes. Free to download, free to use. You only pay for the drinks you pre-buy — at a discount.",
+      "Yes. Free to download, free to use. You only pay for the drinks you pre-buy, at a discount.",
   },
   {
     question: "What are bammer-only nights?",
@@ -68,7 +68,7 @@ const faqItems = [
   {
     question: "What if my venue isn't listed?",
     answer:
-      "Tell us — there's a request field after you register. We're adding Manchester venues every week.",
+      "Tell us. There's a request field after you register. We're adding Manchester venues every week.",
   },
 ]
 
@@ -96,7 +96,7 @@ export function BammersContent() {
                 <span className="lowercase text-flame">nights out.</span>
               </h1>
               <p className="mx-auto mt-5 max-w-md text-lg leading-relaxed text-cream2 lg:mx-0">
-                a big themed night or just a great one with your mates — either
+                a big themed night or just a great one with your mates. either
                 way, you see exactly where the best deals are right now, and your
                 drinks are pre-bought for less before you head out.
               </p>
@@ -206,7 +206,7 @@ export function BammersContent() {
           </h2>
           <p className="mb-8 text-cream2">
             register your interest and we&apos;ll get you in for the Manchester
-            launch this July — plus your own invite link to earn £5 for every 50
+            launch this July, plus your own invite link to earn £5 for every 50
             mates you bring.
           </p>
           <SignupForm variant="bammer" />

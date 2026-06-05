@@ -9,7 +9,6 @@ import { BamSipLogo } from "./bamsip-logo"
 const navLinks = [
   { label: "for bammers", href: "/bammers" },
   { label: "for venues", href: "/venues" },
-  { label: "faq", href: "/#faq" },
 ]
 
 export function Header() {
@@ -20,17 +19,21 @@ export function Header() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <BamSipLogo size="md" />
 
-        {/* Desktop nav */}
-        <nav className="hidden items-center gap-8 md:flex">
+        {/* Desktop nav - centered */}
+        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 md:flex">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="rounded text-sm text-cream2 outline-none transition-colors hover:text-cream focus-visible:ring-2 focus-visible:ring-flame"
+              className="rounded text-sm font-bold text-cream2 outline-none transition-colors hover:text-cream focus-visible:ring-2 focus-visible:ring-flame"
             >
               {link.label}
             </Link>
           ))}
+        </nav>
+
+        {/* Desktop CTA - right aligned */}
+        <div className="hidden md:block">
           <Link
             href="/#waitlist"
             className="inline-flex items-center gap-1.5 rounded-full bg-flame px-4 py-2 text-sm font-semibold text-cream outline-none transition-all hover:bg-flame-soft focus-visible:ring-2 focus-visible:ring-flame focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
@@ -38,7 +41,7 @@ export function Header() {
             join waitlist
             <ArrowRight className="h-4 w-4" />
           </Link>
-        </nav>
+        </div>
 
         {/* Mobile toggle */}
         <button

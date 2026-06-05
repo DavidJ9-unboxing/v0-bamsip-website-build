@@ -110,7 +110,7 @@ export function VenuesContent() {
               </span>
               <h1 className="mt-5 font-display text-5xl font-bold leading-[0.95] tracking-tight text-balance text-cream sm:text-6xl lg:text-7xl">
                 <span className="lowercase">fill your </span>
-                <span className="lowercase text-amber">dead nights.</span>
+                <span className="lowercase text-amber">quiet nights.</span>
               </h1>
               <p className="mx-auto mt-5 max-w-xl text-lg text-cream2">
                 the operator&apos;s tool for live offers, pre-sold drinks, and
@@ -159,7 +159,7 @@ export function VenuesContent() {
             transition={{ duration: 0.6 }}
           >
             <p className="text-xs font-medium uppercase tracking-wider text-amber">
-              quiet night → full bar
+              quiet → full bar
             </p>
             <h2 className="mt-3 font-display text-3xl font-bold text-balance text-cream sm:text-4xl">
               turn your slowest hours into your best ones.

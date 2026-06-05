@@ -56,7 +56,7 @@ export function HomeHero() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                href="#demo"
+                href="/bammers"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-hairline bg-ink2/60 px-6 py-3 text-sm font-semibold text-cream backdrop-blur outline-none transition-colors hover:border-flame/40 focus-visible:ring-2 focus-visible:ring-flame sm:w-auto"
               >
                 see the app

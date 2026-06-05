@@ -16,10 +16,15 @@ export const metadata: Metadata = {
   title: "What's On in Manchester — The BamSip Blog",
   description:
     "Manchester nightlife news, new openings and the stories shaping the city after dark. Delivered by email, SMS, TikTok and Instagram.",
+  alternates: {
+    canonical: "/blog",
+  },
   openGraph: {
     title: "What's On in Manchester — The BamSip Blog",
     description:
       "Manchester nightlife news, new openings and the stories shaping the city after dark.",
+    url: "/blog",
+    type: "website",
   },
 }
 

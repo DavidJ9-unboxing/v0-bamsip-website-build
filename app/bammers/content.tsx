@@ -12,12 +12,10 @@ import { BenefitsTriad } from "@/components/benefits-triad"
 import { Testimonials } from "@/components/testimonials"
 import { ValueStack } from "@/components/value-stack"
 import { HowItWorks } from "@/components/how-it-works"
-import { EventTimeline } from "@/components/event-timeline"
 import { PlannedEvents } from "@/components/planned-events"
 import { ReferralOffer } from "@/components/referral-offer"
 import { FAQ } from "@/components/faq"
 import { SocialProof } from "@/components/social-proof"
-import { DemoSection } from "@/components/demo-section"
 import { SignupForm } from "@/components/signup-form"
 import { images } from "@/lib/images"
 
@@ -167,15 +165,11 @@ export function BammersContent() {
       {/* STEP 3 — Benefits (functional / emotional / financial) */}
       <BenefitsTriad />
 
-      {/* STEP 4 — Reasons to believe: see it, learn the mechanism, trust the backers */}
-      <DemoSection />
+      {/* STEP 4 — Reasons to believe: the mechanism */}
       <HowItWorks steps={howItWorksSteps} />
 
       {/* Flagship product — planned bammer events (win-win) */}
       <PlannedEvents accent="flame" />
-
-      {/* When it's happening — Manchester July → summer → Christmas */}
-      <EventTimeline />
 
       <SocialProof variant="compact" />
 

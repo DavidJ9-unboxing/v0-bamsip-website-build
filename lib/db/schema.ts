@@ -217,3 +217,26 @@ export const socialPosts = pgTable("social_posts", {
   error: text("error"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 })
+
+/* ------------------------------ Analytics ------------------------------- */
+
+/**
+ * First-party page-view tracking. One row per page view, captured by the
+ * client tracker and enriched server-side (device, country) in /api/track.
+ * `visitorId` is an anonymous, rotating per-browser id (no PII) used only to
+ * estimate unique visitors. We never store full IP addresses.
+ */
+export const pageViews = pgTable("page_views", {
+  id: serial("id").primaryKey(),
+  path: text("path").notNull(),
+  // anonymous visitor id (random, stored in a first-party cookie)
+  visitorId: text("visitor_id").notNull(),
+  // full referrer url (if any) and just its host for grouping
+  referrer: text("referrer"),
+  referrerHost: text("referrer_host"),
+  // mobile | tablet | desktop | bot | unknown
+  device: text("device").notNull().default("unknown"),
+  // ISO country code from edge headers, e.g. "GB"
+  country: text("country"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+})

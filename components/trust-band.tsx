@@ -8,9 +8,15 @@ const markers = [
   { icon: Users, text: "Built with nightlife operators." },
   {
     icon: ShieldCheck,
-    text: "Sacha Lord is an advisor to BamSip.",
+    // NOTE: Sacha Lord / NTIA involvement is PLACEHOLDER copy pending approval.
+    // Do not treat as confirmed or final public messaging.
+    text: "Sacha Lord & UK NTIA involvement, subject to approval.",
   },
 ]
+
+// PLACEHOLDER QUOTE — not approved final public copy. Replace before launch.
+const PLACEHOLDER_QUOTE =
+  "BamSip gives operators live offers and real attribution while keeping venues in charge of price. That's the right model for nightlife."
 
 export function TrustBand() {
   return (
@@ -30,6 +36,39 @@ export function TrustBand() {
               <span className="text-sm text-cream2">{m.text}</span>
             </motion.div>
           ))}
+        </div>
+
+        {/* Placeholder credibility quote */}
+        <motion.figure
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="mt-6 rounded-3xl border border-hairline bg-ink2 p-8 text-center"
+        >
+          <blockquote className="mx-auto max-w-2xl font-display text-xl font-medium text-balance text-cream sm:text-2xl">
+            &ldquo;{PLACEHOLDER_QUOTE}&rdquo;
+          </blockquote>
+          <figcaption className="mt-4 text-sm text-mute">
+            Placeholder — pending approval
+          </figcaption>
+        </motion.figure>
+
+        {/* Partner / press logo slots */}
+        <div className="mt-8">
+          <p className="text-center text-[11px] uppercase tracking-wider text-mute">
+            Venue partners & press
+          </p>
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {["Partner", "Partner", "Press", "Press"].map((label, i) => (
+              <div
+                key={i}
+                className="flex h-14 items-center justify-center rounded-xl border border-dashed border-hairline text-xs text-mute"
+              >
+                {label} logo
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

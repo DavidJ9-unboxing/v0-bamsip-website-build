@@ -65,14 +65,6 @@ export function SignupForm({ variant, headline }: SignupFormProps) {
   const [shareUrl, setShareUrl] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const [referredBy, setReferredBy] = useState<string | undefined>(undefined)
-  const [mounted, setMounted] = useState(false)
-
-  // Render the interactive form only after mount so browser extensions
-  // (e.g. password managers) that inject DOM into inputs can't cause a
-  // server/client hydration mismatch.
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   // Capture referral code from URL (?ref=CODE)
   useEffect(() => {
@@ -162,14 +154,6 @@ export function SignupForm({ variant, headline }: SignupFormProps) {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  if (!mounted) {
-    return (
-      <div className="w-full max-w-md" aria-hidden="true">
-        <div className="h-[520px] rounded-2xl border border-hairline bg-ink3/40" />
-      </div>
-    )
-  }
-
   if (isSuccess) {
     return (
       <motion.div
@@ -243,7 +227,7 @@ export function SignupForm({ variant, headline }: SignupFormProps) {
             {e.name && <p className="mt-1 text-xs text-error">{e.name.message}</p>}
           </div>
 
-          <div>
+          <div suppressHydrationWarning>
             <Input {...bammerForm.register("email")} type="email" placeholder="email" className={fieldClass} />
             {e.email && <p className="mt-1 text-xs text-error">{e.email.message}</p>}
           </div>
@@ -372,7 +356,7 @@ export function SignupForm({ variant, headline }: SignupFormProps) {
           {ve.role && <p className="mt-1 text-xs text-error">{ve.role.message}</p>}
         </div>
 
-        <div>
+        <div suppressHydrationWarning>
           <Input {...venueForm.register("email")} type="email" placeholder="email" className={fieldClass} />
           {ve.email && <p className="mt-1 text-xs text-error">{ve.email.message}</p>}
         </div>

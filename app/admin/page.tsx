@@ -1,32 +1,19 @@
-import Link from "next/link"
 import { requireAdmin } from "@/lib/admin"
 import {
   getDashboardStats,
   getSignupTrend,
   getTasteBreakdown,
 } from "@/app/actions/admin"
-import { getVisitStats } from "@/app/actions/analytics"
 import { StatCard } from "@/components/admin/stat-card"
 import { BreakdownChart, TrendChart } from "@/components/admin/insight-charts"
-import {
-  Users,
-  Store,
-  PoundSterling,
-  MessageSquare,
-  Eye,
-  UserCheck,
-  ArrowRight,
-} from "lucide-react"
-
-export const dynamic = "force-dynamic"
+import { Users, Store, PoundSterling, MessageSquare } from "lucide-react"
 
 export default async function AdminDashboard() {
   await requireAdmin()
-  const [stats, trend, breakdown, visits] = await Promise.all([
+  const [stats, trend, breakdown] = await Promise.all([
     getDashboardStats(),
     getSignupTrend(),
     getTasteBreakdown(),
-    getVisitStats(30),
   ])
 
   return (
@@ -66,46 +53,6 @@ export default async function AdminDashboard() {
           icon={PoundSterling}
           accent="success"
         />
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h2 className="font-display text-lg font-semibold text-cream">
-            Site traffic
-            <span className="ml-2 text-xs font-normal text-mute">
-              last 30 days
-            </span>
-          </h2>
-          <Link
-            href="/admin/analytics"
-            className="flex items-center gap-1 text-sm text-flame transition-colors hover:text-flame/80"
-          >
-            Full analytics
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <StatCard
-            label="Page views"
-            value={visits.views.toLocaleString()}
-            sub={`${visits.viewsChange >= 0 ? "+" : ""}${visits.viewsChange}% vs prev 30 days`}
-            icon={Eye}
-          />
-          <StatCard
-            label="Unique visitors"
-            value={visits.visitors.toLocaleString()}
-            sub={`${visits.visitorsChange >= 0 ? "+" : ""}${visits.visitorsChange}% vs prev 30 days`}
-            icon={UserCheck}
-            accent="amber"
-          />
-          <StatCard
-            label="Views / visitor"
-            value={visits.perVisitor}
-            sub="avg pages per visitor"
-            icon={Users}
-            accent="success"
-          />
-        </div>
       </div>
 
       <div className="rounded-2xl border border-hairline bg-ink2 p-5">

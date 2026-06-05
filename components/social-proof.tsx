@@ -33,18 +33,6 @@ export function SocialProof({ variant = "compact" }: SocialProofProps) {
               </motion.div>
             ))}
           </div>
-
-          {/* Partner / press logo slots */}
-          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {["Partner", "Partner", "Press", "Press"].map((label, i) => (
-              <div
-                key={i}
-                className="flex h-14 items-center justify-center rounded-xl border border-dashed border-hairline text-xs text-mute"
-              >
-                {label} logo
-              </div>
-            ))}
-          </div>
         </div>
       </section>
     )

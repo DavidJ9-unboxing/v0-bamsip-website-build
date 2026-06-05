@@ -24,7 +24,7 @@ const features = [
   {
     icon: Wallet,
     headline: "Pre-sold drinks",
-    body: "Guests pay before they walk in. Spend is locked in. The bar doesn't sit dead.",
+    body: "Guests pay before they walk in. Spend is locked in. The bar stays busy.",
   },
   {
     icon: BarChart3,
@@ -41,18 +41,18 @@ const features = [
 const howItWorksSteps = [
   {
     number: 1,
-    headline: "onboard in 15 minutes",
-    body: "add your venue, your offers, your operating hours.",
+    headline: "Onboard in 15 minutes",
+    body: "Add your venue, your offers, your operating hours.",
   },
   {
     number: 2,
-    headline: "push a live offer",
-    body: "tuesday looks quiet? 2-4-1 cocktails, 6–9, capped at 80. one tap.",
+    headline: "Push a live offer",
+    body: "Tuesday looks quiet? 2-4-1 cocktails, 6-9pm, capped at 80. One tap.",
   },
   {
     number: 3,
-    headline: "watch it work",
-    body: "bammers see it instantly. redemptions tick up in real time. the bar fills.",
+    headline: "Watch it work",
+    body: "Bammers see it instantly. Redemptions tick up in real time. The bar fills.",
   },
 ]
 
@@ -60,7 +60,7 @@ const faqItems = [
   {
     question: "What does BamSip cost?",
     answer:
-      "We're finalising pricing before launch — likely a share of redemptions, no monthly fee. Register interest to be part of the conversation.",
+      "We're finalising pricing before launch. Likely a share of redemptions, no monthly fee. Register interest to be part of the conversation.",
   },
   {
     question: "Do venues control pricing?",
@@ -80,7 +80,7 @@ const faqItems = [
   {
     question: "Who owns the customer relationship?",
     answer:
-      "You do. BamSip is the channel — guests redeem at your bar, your way.",
+      "You do. BamSip is the channel. Guests redeem at your bar, your way.",
   },
   {
     question: "Which cities are next?",
@@ -113,8 +113,8 @@ export function VenuesContent() {
                 <span className="lowercase text-amber">quiet nights.</span>
               </h1>
               <p className="mx-auto mt-5 max-w-xl text-lg text-cream2">
-                the operator&apos;s tool for live offers, pre-sold drinks, and
-                real attribution. push a deal in 15 seconds.
+                The operator&apos;s tool for live offers, pre-sold drinks, and
+                real attribution. Push a deal in 15 seconds.
               </p>
             </motion.div>
           </div>
@@ -162,19 +162,19 @@ export function VenuesContent() {
               quiet → full bar
             </p>
             <h2 className="mt-3 font-display text-3xl font-bold text-balance text-cream sm:text-4xl">
-              turn your slowest hours into your best ones.
+              Turn your slowest hours into your best ones.
             </h2>
             <p className="mt-4 leading-relaxed text-cream2">
-              every venue has dead windows — a wet tuesday, the early-doors lull,
+              Every venue has quiet windows: a wet Tuesday, the early-doors lull,
               the hour before the rush. BamSip puts a live, capped offer in front
-              of nearby bammers the moment you need traffic, then proves exactly
+              of nearby Bammers the moment you need traffic, then proves exactly
               what it brought in.
             </p>
             <ul className="mt-6 space-y-3">
               {[
-                "pre-sold drinks, locked-in spend",
-                "you set the cap — never a discount race",
-                "redemption-by-redemption attribution",
+                "Pre-sold drinks, locked-in spend",
+                "You set the cap. Never a discount race.",
+                "Redemption-by-redemption attribution",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-3 text-cream2">
                   <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber" />
@@ -203,7 +203,7 @@ export function VenuesContent() {
         />
         <div className="relative mx-auto flex max-w-md flex-col items-center text-center">
           <h2 className="mb-8 font-display text-3xl font-bold lowercase text-balance text-cream sm:text-4xl">
-            the manchester rollout starts now.
+            The Manchester rollout starts now.
           </h2>
           <SignupForm variant="venue" />
         </div>

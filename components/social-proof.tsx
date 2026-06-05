@@ -7,12 +7,10 @@ interface SocialProofProps {
   variant?: "compact" | "full"
 }
 
-// PLACEHOLDER credibility copy. Sacha Lord / NTIA involvement is NOT confirmed
-// and is subject to approval. Replace before any final public launch.
 const markers = [
   { icon: MapPin, text: "Manchester rollout now onboarding." },
   { icon: Users, text: "Built with nightlife operators." },
-  { icon: ShieldCheck, text: "Sacha Lord & UK NTIA involvement, subject to approval." },
+  { icon: ShieldCheck, text: "Sacha Lord is an advisor to BamSip." },
 ]
 
 export function SocialProof({ variant = "compact" }: SocialProofProps) {
@@ -35,18 +33,6 @@ export function SocialProof({ variant = "compact" }: SocialProofProps) {
               </motion.div>
             ))}
           </div>
-
-          {/* Partner / press logo slots */}
-          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {["Partner", "Partner", "Press", "Press"].map((label, i) => (
-              <div
-                key={i}
-                className="flex h-14 items-center justify-center rounded-xl border border-dashed border-hairline text-xs text-mute"
-              >
-                {label} logo
-              </div>
-            ))}
-          </div>
         </div>
       </section>
     )
@@ -60,9 +46,7 @@ export function SocialProof({ variant = "compact" }: SocialProofProps) {
           Manchester rollout now onboarding — built with nightlife operators.
         </p>
         <p className="text-xs text-mute">
-          {/* PLACEHOLDER: not confirmed, subject to approval */}
-          Sacha Lord &amp; UK Night Time Industries Association involvement,
-          subject to approval.
+          Sacha Lord is an advisor to BamSip.
         </p>
       </div>
     </section>

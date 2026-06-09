@@ -31,6 +31,7 @@ import {
   User,
   ExternalLink,
   Download,
+  Info,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
@@ -180,16 +181,16 @@ export function DirectoryTable({
       </p>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-2xl border border-hairline">
-        <div className="overflow-x-auto">
+      <div className="rounded-2xl border border-hairline">
+        <div className="max-h-[calc(100svh-220px)] overflow-auto rounded-2xl">
           <table className="w-full text-sm">
-            <thead className="bg-ink2 text-left text-xs uppercase tracking-wide text-mute">
+            <thead className="text-left text-xs uppercase tracking-wide text-mute">
               <tr>
-                <th className="px-4 py-3 font-medium">Venue</th>
-                <th className="px-4 py-3 font-medium">Category</th>
-                <th className="px-4 py-3 font-medium">Contact</th>
-                <th className="px-4 py-3 font-medium">Social</th>
-                <th className="px-4 py-3 font-medium">Status</th>
+                <th className="sticky top-0 z-10 bg-ink2 px-4 py-3 font-medium">Venue</th>
+                <th className="sticky top-0 z-10 bg-ink2 px-4 py-3 font-medium">Category</th>
+                <th className="sticky top-0 z-10 bg-ink2 px-4 py-3 font-medium">Phone</th>
+                <th className="sticky top-0 z-10 bg-ink2 px-4 py-3 font-medium">Contact</th>
+                <th className="sticky top-0 z-10 bg-ink2 px-4 py-3 font-medium">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-hairline">
@@ -228,9 +229,18 @@ export function DirectoryTable({
                       {r.instagram && <Instagram className="h-4 w-4" />}
                       {r.facebook && <Facebook className="h-4 w-4" />}
                       {r.website && <Globe className="h-4 w-4" />}
-                      {!r.instagram && !r.facebook && !r.website && (
-                        <span className="text-xs">—</span>
+                      {r.email && <Mail className="h-4 w-4 text-cream2" />}
+                      {r.description && (
+                        <Info
+                          className="h-4 w-4 text-flame"
+                          aria-label="Venue information available"
+                        />
                       )}
+                      {!r.instagram &&
+                        !r.facebook &&
+                        !r.website &&
+                        !r.email &&
+                        !r.description && <span className="text-xs">—</span>}
                     </div>
                   </td>
                   <td className="px-4 py-3">
@@ -367,7 +377,7 @@ function DetailSheet({
                   />
                 )}
                 {selected.website && (
-                  <LinkRow icon={Globe} href={selected.website} value={selected.website} />
+                  <LinkRow icon={Globe} href={externalUrl(selected.website)} value={selected.website} />
                 )}
                 {selected.instagram && (
                   <LinkRow
@@ -377,12 +387,12 @@ function DetailSheet({
                   />
                 )}
                 {selected.facebook && (
-                  <LinkRow icon={Facebook} href={selected.facebook} value={selected.facebook} />
+                  <LinkRow icon={Facebook} href={externalUrl(selected.facebook)} value={selected.facebook} />
                 )}
                 {selected.contactUrl && (
                   <LinkRow
                     icon={ExternalLink}
-                    href={selected.contactUrl}
+                    href={externalUrl(selected.contactUrl)}
                     value="Contact page"
                   />
                 )}
@@ -532,6 +542,12 @@ function exportCsv(rows: Directory[]) {
 function instaUrl(handle: string) {
   if (handle.startsWith("http")) return handle
   return `https://instagram.com/${handle.replace(/^@/, "")}`
+}
+
+function externalUrl(url: string) {
+  const trimmed = url.trim()
+  if (/^https?:\/\//i.test(trimmed)) return trimmed
+  return `https://${trimmed.replace(/^\/+/, "")}`
 }
 
 function Row({

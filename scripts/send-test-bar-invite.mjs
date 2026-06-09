@@ -1,8 +1,8 @@
 import { Resend } from "resend"
 import pg from "pg"
 
+const VENUE_NAME = "Test Bar"
 const TO = "dwolfe.j9@gmail.com"
-const SUBJECT = "100 first-time guests, first round on us"
 const FROM = process.env.RESEND_FROM_EMAIL?.trim() || "BamSip <hello@bamsip.com>"
 
 const INTEREST_LINK = "https://www.bamsip.com/venues#interest"
@@ -182,17 +182,22 @@ if (!apiKey) {
 const { Pool } = pg
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 
-// Look up Test Bar signup id for logging
+// Look up Test Bar signup id + venue name for logging and dynamic subject
 let recipientId = null
+let venueName = VENUE_NAME
 try {
   const r = await pool.query(
-    "SELECT id FROM venue_signups WHERE email = $1 ORDER BY created_at DESC LIMIT 1",
+    "SELECT id, venue_name FROM venue_signups WHERE email = $1 ORDER BY created_at DESC LIMIT 1",
     [TO],
   )
   recipientId = r.rows[0]?.id ?? null
+  if (r.rows[0]?.venue_name) venueName = r.rows[0].venue_name
 } catch (e) {
   console.log("[v0] lookup failed:", e.message)
 }
+
+// Subject is generated dynamically from the venue record (not stored in the HTML template)
+const SUBJECT = `Could ${venueName} host a BamSip launch night?`
 
 const resend = new Resend(apiKey)
 let status = "sent"

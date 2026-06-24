@@ -40,6 +40,42 @@ export function venueConfirmEmail(
     ${SHELL_CLOSE}`
 }
 
+/**
+ * Default hero used in the venue launch email. Points at the live site asset.
+ * If a custom hero is created later, upload it to
+ * /public/images/email-venue-launch-hero.jpg and swap this for:
+ * https://www.bamsip.com/images/email-venue-launch-hero.jpg
+ */
+const VENUE_LAUNCH_HERO =
+  "https://www.bamsip.com/images/hero-night.png?dpl=dpl_3BpxQPPnik5swLTGYpvdqfTzYckG"
+
+/** Dynamic subject for the venue launch email. Built from the venue record. */
+export function venueLaunchSubject(venueName: string) {
+  return `${venueName} x BamSip: smarter nights out start here`
+}
+
+/**
+ * Outbound launch/outreach email to a target venue. The subject is generated
+ * separately via venueLaunchSubject() and passed to sendEmail — it is NOT baked
+ * into this HTML.
+ */
+export function venueLaunchEmail(
+  contactName: string,
+  venueName: string,
+  ctaUrl: string,
+) {
+  const greeting = contactName ? `Hi ${escapeHtml(contactName)},` : "Hi there,"
+  return `${SHELL_OPEN}
+    <img src="${VENUE_LAUNCH_HERO}" alt="BamSip — Manchester nights, sorted" style="display:block;width:100%;max-width:520px;height:auto;border-radius:12px;margin:0 0 20px;" />
+    <h1 style="font-size:22px;margin:0 0 12px;">smarter nights out start here</h1>
+    <p style="line-height:1.6;color:#d9ccc0;">${greeting}</p>
+    <p style="line-height:1.6;color:#d9ccc0;">We're bringing BamSip to Manchester this July and we'd love to put ${escapeHtml(venueName)} in front of our crowd. BamSip fills your quieter nights by sending engaged locals your way — no upfront cost, no commitment.</p>
+    <p style="line-height:1.6;color:#d9ccc0;">Want to hear how it works for venues like yours?</p>
+    ${BTN(ctaUrl, "Get the venue details")}
+    <p style="line-height:1.6;color:#9a8d80;font-size:13px;">If now isn't the right time, no worries — just ignore this email.</p>
+    ${SHELL_CLOSE}`
+}
+
 function escapeHtml(s: string) {
   return s.replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string,

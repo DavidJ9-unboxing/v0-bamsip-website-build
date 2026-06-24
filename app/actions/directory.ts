@@ -5,6 +5,9 @@ import { venueDirectory, venueSignups } from "@/lib/db/schema"
 import { and, desc, eq, ilike, or, sql } from "drizzle-orm"
 import { getAdminSession } from "@/lib/admin"
 import { revalidatePath } from "next/cache"
+import { sendEmail } from "@/lib/messaging"
+import { venueLaunchEmail, venueLaunchSubject } from "@/lib/email-templates"
+import { getBaseUrl } from "@/lib/referral"
 
 async function assertAdmin() {
   const session = await getAdminSession()
@@ -227,6 +230,60 @@ export async function updateDirectoryVenue(
     })
     .where(eq(venueDirectory.id, id))
   revalidatePath("/admin/venues/directory")
+}
+
+/**
+ * Sends the venue launch/outreach email to a directory record. The subject is
+ * generated dynamically from the venue's name (never baked into the template).
+ * On success the record is moved to 'pending' so the directory reflects that
+ * we've made contact.
+ */
+export async function sendVenueLaunchEmail(id: number) {
+  await assertAdmin()
+
+  const [venue] = await db
+    .select({
+      id: venueDirectory.id,
+      name: venueDirectory.name,
+      owner: venueDirectory.owner,
+      email: venueDirectory.email,
+      status: venueDirectory.status,
+    })
+    .from(venueDirectory)
+    .where(eq(venueDirectory.id, id))
+    .limit(1)
+
+  if (!venue) return { ok: false as const, error: "Venue not found." }
+  if (!venue.email)
+    return { ok: false as const, error: "Add an email address before sending." }
+
+  const ctaUrl = `${getBaseUrl()}/venues`
+  const res = await sendEmail({
+    to: venue.email,
+    subject: venueLaunchSubject(venue.name),
+    recipientType: "venue",
+    template: "venue-launch",
+    html: venueLaunchEmail(venue.owner ?? "", venue.name, ctaUrl),
+    text: `Hi${venue.owner ? ` ${venue.owner}` : ""}, we're bringing BamSip to Manchester this July and would love to feature ${venue.name}. See the venue details: ${ctaUrl}`,
+  })
+
+  if (!res.ok) {
+    return {
+      ok: false as const,
+      error: res.skipped ? "Email isn't configured yet." : res.error ?? "Send failed.",
+    }
+  }
+
+  // Only advance a fresh prospect; never demote a signed_up record.
+  if (venue.status === "prospect") {
+    await db
+      .update(venueDirectory)
+      .set({ status: "pending", updatedAt: new Date() })
+      .where(eq(venueDirectory.id, id))
+  }
+
+  revalidatePath("/admin/venues/directory")
+  return { ok: true as const }
 }
 
 export async function deleteDirectoryVenue(id: number) {

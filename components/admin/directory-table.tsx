@@ -4,7 +4,6 @@ import { useMemo, useState, useTransition } from "react"
 import {
   updateDirectoryVenue,
   deleteDirectoryVenue,
-  sendVenueLaunchEmail,
 } from "@/app/actions/directory"
 import { StatusBadge } from "@/components/admin/status-badge"
 import { Input } from "@/components/ui/input"
@@ -32,7 +31,6 @@ import {
   User,
   ExternalLink,
   Download,
-  Send,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
@@ -302,25 +300,6 @@ function DetailSheet({
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const [sending, setSending] = useState(false)
-  const [sendMsg, setSendMsg] = useState<{ ok: boolean; text: string } | null>(null)
-
-  const sendLaunch = () => {
-    if (!selected) return
-    setSendMsg(null)
-    setSending(true)
-    startTransition(async () => {
-      const res = await sendVenueLaunchEmail(selected.id)
-      setSending(false)
-      if (res.ok) {
-        setSendMsg({ ok: true, text: `Launch email sent to ${selected.email}.` })
-        onPatch({ ...selected, status: selected.status === "prospect" ? "pending" : selected.status })
-        router.refresh()
-      } else {
-        setSendMsg({ ok: false, text: res.error ?? "Send failed." })
-      }
-    })
-  }
 
   const save = (patch: Partial<Directory>) => {
     if (!selected) return
@@ -464,37 +443,6 @@ function DetailSheet({
                 placeholder="Add email once known"
                 icon={Mail}
               />
-
-              {/* Launch outreach email */}
-              <div className="rounded-xl border border-hairline bg-ink p-3">
-                <p className="mb-1 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-mute">
-                  <Send className="h-3.5 w-3.5" /> Launch outreach
-                </p>
-                <p className="mb-3 text-xs text-mute">
-                  Sends the BamSip venue launch email to this contact. Subject is
-                  built from the venue name automatically.
-                </p>
-                <Button
-                  onClick={sendLaunch}
-                  disabled={sending || isPending || !selected.email}
-                  className="w-full"
-                >
-                  <Send className="mr-1.5 h-4 w-4" />
-                  {sending ? "Sending…" : "Send launch email"}
-                </Button>
-                {!selected.email && (
-                  <p className="mt-2 text-xs text-amber">
-                    Add an email address above to enable sending.
-                  </p>
-                )}
-                {sendMsg && (
-                  <p
-                    className={`mt-2 text-xs ${sendMsg.ok ? "text-success" : "text-error"}`}
-                  >
-                    {sendMsg.text}
-                  </p>
-                )}
-              </div>
 
               {/* Status */}
               <div>

@@ -49,7 +49,7 @@ export function venueConfirmEmail(
  * to: https://www.bamsip.com/images/email-venue-launch-hero.jpg
  */
 export const VENUE_LAUNCH_HERO =
-  "https://www.bamsip.com/images/hero-night.png?dpl=dpl_3BpxQPPnik5swLTGYpvdqfTzYckG"
+  "https://www.bamsip.com/images/hero-night.png"
 
 /** Personalisation tokens supported in venue email subjects and bodies. */
 export type VenueEmailVars = {
@@ -125,21 +125,25 @@ export function buildVenueEmailHtml(content: VenueEmailContent) {
 
 /** Sensible default subject for the venue launch campaign (with token). */
 export const VENUE_LAUNCH_SUBJECT =
-  "{{venueName}} x BamSip: smarter nights out start here"
+  "{{venueName}}: first round's on us?"
 
 /** Default branded template content for the venue launch campaign. */
 export function defaultVenueLaunchContent(ctaUrl: string): VenueEmailContent {
   return {
     mode: "template",
     heroUrl: VENUE_LAUNCH_HERO,
-    headline: "smarter nights out start here",
+    headline: "we're picking four venues. first round's on us.",
     body: `Hi {{contactName}},
 
-We're bringing BamSip to Manchester this July and we'd love to put {{venueName}} in front of our crowd. BamSip fills your quieter nights by sending engaged locals your way — no upfront cost, no commitment.
+We're launching BamSip in Manchester this July, and we're choosing four venues to host a launch night. {{venueName}} is exactly the kind of room we have in mind.
 
-Want to hear how it works for venues like yours?`,
-    ctaLabel: "Get the venue details",
-    ctaUrl,
+Here's the deal: we bring the crowd and buy the first round for the first 100 people through the door. It runs on Stripe and lands straight in your till, so to you it's just a busy night taking normal tap payments. One drink each on us, then it's a full bar on their own money.
+
+All we ask in return is a genuine discount on that first round. It's a friends-and-family launch for us, as much PR as party, and a packed room on a night that might otherwise be quiet.
+
+Want one of the four slots? Just reply, or register your interest below and we'll send dates.`,
+    ctaLabel: "register your interest",
+    ctaUrl: "https://www.bamsip.com/venues#interest",
   }
 }
 

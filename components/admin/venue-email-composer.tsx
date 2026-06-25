@@ -355,14 +355,13 @@ export function VenueEmailComposer({
           </div>
 
           <div className="flex items-center justify-between border-y border-hairline py-2">
-            <button
-              type="button"
-              onClick={toggleAllFiltered}
-              className="flex items-center gap-2 text-sm text-cream2 hover:text-cream"
-            >
-              <Checkbox checked={allFilteredSelected} />
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-cream2 hover:text-cream">
+              <Checkbox
+                checked={allFilteredSelected}
+                onCheckedChange={toggleAllFiltered}
+              />
               Select all ({selectableFiltered.length})
-            </button>
+            </label>
             {selected.size > 0 && (
               <button
                 type="button"

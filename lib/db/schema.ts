@@ -127,6 +127,8 @@ export const venueDirectory = pgTable("venue_directory", {
   description: text("description"),
   // Display order — pre-computed in the source data (1 = highest priority).
   priority: integer("priority"),
+  // Priority tier from the source ranking: "A" | "B" | "C" (null = lower/untiered).
+  tier: text("tier"),
   // false = no valid email (or a scraping artifact); sending is disabled.
   emailable: boolean("emailable").notNull().default(true),
   // Outreach tracking — incremented only on a confirmed successful send.

@@ -104,6 +104,8 @@ export function VenueEmailComposer({
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return venuesView.filter((v) => {
+      // Venues without a valid email are hidden here (they stay in the directory).
+      if (!v.emailable) return false
       if (sourceFilter !== "all" && v.source !== sourceFilter) return false
       if (statusFilter === "sent" && v.timesSent === 0) return false
       else if (statusFilter === "not-sent" && v.timesSent > 0) return false
@@ -446,7 +448,7 @@ export function VenueEmailComposer({
                     />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <ConfidenceDot confidence={v.confidence} />
+                        <TierDot tier={v.tier} />
                         <span
                           className={`truncate font-medium ${v.emailable ? "text-cream" : "text-mute"}`}
                         >
@@ -891,22 +893,21 @@ export function VenueEmailComposer({
   )
 }
 
-const CONFIDENCE_COLOR: Record<string, string> = {
-  high: "bg-success",
-  "operator-level": "bg-sky-400",
-  medium: "bg-amber",
-  "needs-research": "bg-orange-400",
-  low: "bg-mute",
+// Priority tier → dot colour. A = green, B = yellow, everything else (C/D and
+// lower) = red.
+function tierColor(tier: string | null) {
+  if (tier === "A") return "bg-success"
+  if (tier === "B") return "bg-amber"
+  return "bg-red-500"
 }
 
-function ConfidenceDot({ confidence }: { confidence: string | null }) {
-  if (!confidence) return null
-  const color = CONFIDENCE_COLOR[confidence] ?? "bg-mute"
+function TierDot({ tier }: { tier: string | null }) {
+  const label = tier ? `Tier ${tier}` : "Lower priority"
   return (
     <span
-      className={`h-2 w-2 shrink-0 rounded-full ${color}`}
-      title={`${confidence} confidence`}
-      aria-label={`${confidence} confidence`}
+      className={`h-2 w-2 shrink-0 rounded-full ${tierColor(tier)}`}
+      title={label}
+      aria-label={label}
     />
   )
 }

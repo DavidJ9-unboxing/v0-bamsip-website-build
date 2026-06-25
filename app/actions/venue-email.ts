@@ -44,6 +44,8 @@ export type EmailableVenue = {
   category: string | null
   // Pre-computed display order (1 = highest). Signups sort to the top.
   priority: number
+  // Priority tier: "A" | "B" | "C" (null = lower/untiered).
+  tier: string | null
   confidence: string | null
   // false = no valid email; Send/Resend is disabled and it's excluded from bulk.
   emailable: boolean
@@ -131,6 +133,7 @@ export async function getEmailableVenues(): Promise<EmailableVenue[]> {
         status: venueDirectory.status,
         category: venueDirectory.category,
         priority: venueDirectory.priority,
+        tier: venueDirectory.tier,
         confidence: venueDirectory.confidence,
         emailable: venueDirectory.emailable,
         timesSent: venueDirectory.timesSent,
@@ -184,6 +187,7 @@ export async function getEmailableVenues(): Promise<EmailableVenue[]> {
       status: r.status,
       category: r.category,
       priority: r.priority ?? Number.MAX_SAFE_INTEGER,
+      tier: r.tier,
       confidence: r.confidence,
       emailable: r.emailable && EMAIL_RE.test(email),
       timesSent: r.timesSent ?? 0,
@@ -206,6 +210,7 @@ export async function getEmailableVenues(): Promise<EmailableVenue[]> {
       category: r.venueType ?? null,
       // Signups are our warmest leads — float them above the directory.
       priority: -1,
+      tier: null,
       confidence: null,
       emailable: EMAIL_RE.test(email),
       timesSent: 0,

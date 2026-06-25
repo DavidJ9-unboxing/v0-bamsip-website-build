@@ -61,6 +61,7 @@ type Directory = {
   notes: string | null
   createdAt: Date | null
   priority: number | null
+  tier: string | null
   emailable: boolean
   timesSent: number
   lastSentAt: Date | null
@@ -212,7 +213,7 @@ export function DirectoryTable({
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <ConfidenceDot confidence={r.confidence} />
+                      <TierDot tier={r.tier} />
                       <span className="font-medium text-cream">{r.name}</span>
                       {!r.emailable && (
                         <span
@@ -661,22 +662,21 @@ function EditField({
   )
 }
 
-const CONFIDENCE_COLOR: Record<string, string> = {
-  high: "bg-success",
-  "operator-level": "bg-sky-400",
-  medium: "bg-amber",
-  "needs-research": "bg-orange-400",
-  low: "bg-mute",
+// Priority tier → dot colour. A = green, B = yellow, everything else (C/D and
+// lower) = red. Untiered venues show no dot.
+function tierColor(tier: string | null) {
+  if (tier === "A") return "bg-success"
+  if (tier === "B") return "bg-amber"
+  return "bg-red-500"
 }
 
-function ConfidenceDot({ confidence }: { confidence: string | null }) {
-  if (!confidence) return <span className="h-2 w-2 shrink-0 rounded-full bg-transparent" />
-  const color = CONFIDENCE_COLOR[confidence] ?? "bg-mute"
+function TierDot({ tier }: { tier: string | null }) {
+  if (!tier) return <span className="h-2 w-2 shrink-0 rounded-full bg-transparent" />
   return (
     <span
-      className={`h-2 w-2 shrink-0 rounded-full ${color}`}
-      title={`${confidence} confidence`}
-      aria-label={`${confidence} confidence`}
+      className={`h-2 w-2 shrink-0 rounded-full ${tierColor(tier)}`}
+      title={`Tier ${tier}`}
+      aria-label={`Tier ${tier}`}
     />
   )
 }

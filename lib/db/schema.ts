@@ -125,6 +125,13 @@ export const venueDirectory = pgTable("venue_directory", {
   source: text("source"),
   confidence: text("confidence"),
   description: text("description"),
+  // Display order — pre-computed in the source data (1 = highest priority).
+  priority: integer("priority"),
+  // false = no valid email (or a scraping artifact); sending is disabled.
+  emailable: boolean("emailable").notNull().default(true),
+  // Outreach tracking — incremented only on a confirmed successful send.
+  timesSent: integer("times_sent").notNull().default(0),
+  lastSentAt: timestamp("last_sent_at"),
   // landlines from research
   phone: text("phone"),
   phoneSecondary: text("phone_secondary"),

@@ -46,6 +46,10 @@ import {
   CheckCircle2,
   Store,
   BookMarked,
+  RotateCw,
+  Clock,
+  Ban,
+  Check,
 } from "lucide-react"
 
 type Mode = "template" | "html"
@@ -70,6 +74,21 @@ export function VenueEmailComposer({
   const [sourceFilter, setSourceFilter] = useState<"all" | "directory" | "signup">("all")
   const [statusFilter, setStatusFilter] = useState<string>("all")
 
+  // Optimistic send-tracking overlay so per-row "Sent" pills update instantly
+  // after a send, before the server refresh lands.
+  const [sentOverlay, setSentOverlay] = useState<
+    Record<string, { timesSent: number; lastSentAt: string | null }>
+  >({})
+
+  const venuesView = useMemo(
+    () =>
+      venues.map((v) => {
+        const o = sentOverlay[v.key]
+        return o ? { ...v, timesSent: o.timesSent, lastSentAt: o.lastSentAt } : v
+      }),
+    [venues, sentOverlay],
+  )
+
   const statuses = useMemo(
     () => Array.from(new Set(venues.map((v) => v.status))).sort(),
     [venues],
@@ -77,9 +96,12 @@ export function VenueEmailComposer({
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
-    return venues.filter((v) => {
+    return venuesView.filter((v) => {
       if (sourceFilter !== "all" && v.source !== sourceFilter) return false
-      if (statusFilter !== "all" && v.status !== statusFilter) return false
+      if (statusFilter === "sent" && v.timesSent === 0) return false
+      else if (statusFilter === "not-sent" && v.timesSent > 0) return false
+      else if (statusFilter !== "all" && statusFilter !== "sent" && statusFilter !== "not-sent" && v.status !== statusFilter)
+        return false
       if (!q) return true
       return (
         v.venueName.toLowerCase().includes(q) ||
@@ -87,10 +109,17 @@ export function VenueEmailComposer({
         v.contactName.toLowerCase().includes(q)
       )
     })
-  }, [venues, search, sourceFilter, statusFilter])
+  }, [venuesView, search, sourceFilter, statusFilter])
+
+  // Only emailable rows can be (de)selected — non-emailable are excluded from bulk.
+  const selectableFiltered = useMemo(
+    () => filtered.filter((v) => v.emailable),
+    [filtered],
+  )
 
   const allFilteredSelected =
-    filtered.length > 0 && filtered.every((v) => selected.has(v.key))
+    selectableFiltered.length > 0 &&
+    selectableFiltered.every((v) => selected.has(v.key))
 
   const toggle = (key: string) =>
     setSelected((prev) => {
@@ -102,10 +131,20 @@ export function VenueEmailComposer({
   const toggleAllFiltered = () =>
     setSelected((prev) => {
       const next = new Set(prev)
-      if (allFilteredSelected) filtered.forEach((v) => next.delete(v.key))
-      else filtered.forEach((v) => next.add(v.key))
+      if (allFilteredSelected) selectableFiltered.forEach((v) => next.delete(v.key))
+      else selectableFiltered.forEach((v) => next.add(v.key))
       return next
     })
+
+  // record an optimistic successful send for one venue
+  const markSent = (v: EmailableVenue) =>
+    setSentOverlay((prev) => ({
+      ...prev,
+      [v.key]: {
+        timesSent: (prev[v.key]?.timesSent ?? v.timesSent) + 1,
+        lastSentAt: new Date().toISOString(),
+      },
+    }))
 
   // ---- compose ----
   const defaultContent = defaultVenueLaunchContent(defaultCtaUrl)
@@ -173,9 +212,10 @@ export function VenueEmailComposer({
 
   const doSend = () => {
     setResult(null)
+    const keys = [...selected]
     startSending(async () => {
       const res = await sendVenueCampaign({
-        recipientKeys: [...selected],
+        recipientKeys: keys,
         subject,
         content: buildContent(),
       })
@@ -184,6 +224,11 @@ export function VenueEmailComposer({
         setResult(res.error ?? "Send failed.")
         return
       }
+      // Optimistically bump the pills for everyone we just emailed.
+      keys.forEach((k) => {
+        const v = venues.find((x) => x.key === k)
+        if (v) markSent(v)
+      })
       const parts = [`${res.sent} sent`]
       if (res.failed) parts.push(`${res.failed} failed`)
       if (res.skipped) parts.push(`${res.skipped} skipped`)
@@ -191,6 +236,46 @@ export function VenueEmailComposer({
       setSelected(new Set())
       router.refresh()
     })
+  }
+
+  // ---- per-row send / resend ----
+  const [rowSending, setRowSending] = useState<string | null>(null)
+  const [resendTarget, setResendTarget] = useState<EmailableVenue | null>(null)
+
+  const rowCanSend = subject.trim().length > 0 && contentReady
+
+  const sendToOne = (v: EmailableVenue) => {
+    if (!v.emailable || !rowCanSend) return
+    setResult(null)
+    setRowSending(v.key)
+    startSending(async () => {
+      const res = await sendVenueCampaign({
+        recipientKeys: [v.key],
+        subject,
+        content: buildContent(),
+      })
+      setRowSending(null)
+      setResendTarget(null)
+      if (!res.ok && "error" in res) {
+        setResult(res.error ?? "Send failed.")
+        return
+      }
+      if (res.sent > 0) {
+        markSent(v)
+        setResult(`Sent to ${v.venueName}.`)
+      } else if (res.skipped) {
+        setResult(`Skipped ${v.venueName} — email isn't configured yet.`)
+      } else {
+        setResult(`Couldn't send to ${v.venueName}.`)
+      }
+      router.refresh()
+    })
+  }
+
+  // First send goes straight through; a resend asks for confirmation first.
+  const handleRowSend = (v: EmailableVenue) => {
+    if (v.timesSent > 0) setResendTarget(v)
+    else sendToOne(v)
   }
 
   return (
@@ -252,6 +337,8 @@ export function VenueEmailComposer({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Any status</SelectItem>
+                  <SelectItem value="sent">Sent</SelectItem>
+                  <SelectItem value="not-sent">Not sent</SelectItem>
                   {statuses.map((s) => (
                     <SelectItem key={s} value={s}>
                       {s}
@@ -269,7 +356,7 @@ export function VenueEmailComposer({
               className="flex items-center gap-2 text-sm text-cream2 hover:text-cream"
             >
               <Checkbox checked={allFilteredSelected} />
-              Select all ({filtered.length})
+              Select all ({selectableFiltered.length})
             </button>
             {selected.size > 0 && (
               <button
@@ -286,19 +373,32 @@ export function VenueEmailComposer({
             {filtered.length ? (
               filtered.map((v) => {
                 const checked = selected.has(v.key)
+                const sending = rowSending === v.key
                 return (
-                  <label
+                  <div
                     key={v.key}
-                    className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-colors ${
+                    className={`flex items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-colors ${
                       checked
                         ? "border-flame/40 bg-flame/10"
-                        : "border-hairline bg-ink hover:bg-ink3"
+                        : v.emailable
+                          ? "border-hairline bg-ink hover:bg-ink3"
+                          : "border-hairline bg-ink/60"
                     }`}
                   >
-                    <Checkbox checked={checked} onCheckedChange={() => toggle(v.key)} />
+                    <Checkbox
+                      checked={checked}
+                      disabled={!v.emailable}
+                      onCheckedChange={() => v.emailable && toggle(v.key)}
+                      aria-label={`Select ${v.venueName}`}
+                    />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="truncate font-medium text-cream">{v.venueName}</span>
+                        <ConfidenceDot confidence={v.confidence} />
+                        <span
+                          className={`truncate font-medium ${v.emailable ? "text-cream" : "text-mute"}`}
+                        >
+                          {v.venueName}
+                        </span>
                         <Badge
                           variant="outline"
                           className="shrink-0 gap-1 border-hairline text-[10px] text-mute"
@@ -310,10 +410,59 @@ export function VenueEmailComposer({
                           )}
                           {v.source}
                         </Badge>
+                        {v.timesSent > 0 && (
+                          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-medium text-success">
+                            <Check className="h-2.5 w-2.5" />
+                            Sent{v.timesSent > 1 ? ` ${v.timesSent}×` : ""}
+                          </span>
+                        )}
                       </div>
-                      <div className="truncate text-xs text-mute">{v.email}</div>
+                      <div className="mt-0.5 flex items-center gap-2 text-xs text-mute">
+                        {v.emailable ? (
+                          <span className="truncate">{v.email}</span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-amber-soft/80">
+                            <Ban className="h-3 w-3" /> no valid email
+                          </span>
+                        )}
+                        {v.lastSentAt && (
+                          <span className="inline-flex shrink-0 items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {formatSent(v.lastSentAt)}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </label>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={!v.emailable || !rowCanSend || isSending}
+                      onClick={() => handleRowSend(v)}
+                      title={
+                        v.emailable
+                          ? rowCanSend
+                            ? undefined
+                            : "Add a subject and body first"
+                          : "No valid email"
+                      }
+                      className="h-8 shrink-0 border-hairline px-2.5 text-xs"
+                    >
+                      {sending ? (
+                        "Sending…"
+                      ) : v.timesSent > 0 ? (
+                        <>
+                          <RotateCw className="h-3.5 w-3.5" />
+                          Resend
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-3.5 w-3.5" />
+                          Send
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 )
               })
             ) : (
@@ -561,6 +710,80 @@ export function VenueEmailComposer({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* resend confirm dialog */}
+      <Dialog open={!!resendTarget} onOpenChange={(o) => !o && setResendTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Resend to this venue?</DialogTitle>
+            <DialogDescription>
+              {resendTarget && (
+                <>
+                  You&apos;ve already emailed{" "}
+                  <strong className="text-cream">{resendTarget.venueName}</strong>{" "}
+                  {resendTarget.timesSent}{" "}
+                  time{resendTarget.timesSent === 1 ? "" : "s"}
+                  {resendTarget.lastSentAt
+                    ? ` (last ${formatSent(resendTarget.lastSentAt)})`
+                    : ""}
+                  . Send the current email again?
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setResendTarget(null)}
+              className="border-hairline"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => resendTarget && sendToOne(resendTarget)}
+              disabled={isSending}
+              className="bg-flame text-cream hover:bg-flame-soft"
+            >
+              <RotateCw className="h-4 w-4" />
+              {isSending ? "Sending…" : "Confirm & resend"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
+}
+
+const CONFIDENCE_COLOR: Record<string, string> = {
+  high: "bg-success",
+  "operator-level": "bg-sky-400",
+  medium: "bg-amber",
+  "needs-research": "bg-orange-400",
+  low: "bg-mute",
+}
+
+function ConfidenceDot({ confidence }: { confidence: string | null }) {
+  if (!confidence) return null
+  const color = CONFIDENCE_COLOR[confidence] ?? "bg-mute"
+  return (
+    <span
+      className={`h-2 w-2 shrink-0 rounded-full ${color}`}
+      title={`${confidence} confidence`}
+      aria-label={`${confidence} confidence`}
+    />
+  )
+}
+
+function formatSent(iso: string) {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ""
+  const diffMs = Date.now() - d.getTime()
+  const day = 86_400_000
+  if (diffMs < day && d.getDate() === new Date().getDate()) {
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  }
+  if (diffMs < 7 * day) {
+    return d.toLocaleDateString([], { weekday: "short" })
+  }
+  return d.toLocaleDateString([], { day: "numeric", month: "short" })
 }

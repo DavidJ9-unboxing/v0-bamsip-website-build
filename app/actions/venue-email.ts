@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db"
 import { venueDirectory, venueSignups } from "@/lib/db/schema"
-import { eq, desc } from "drizzle-orm"
+import { eq, desc, sql } from "drizzle-orm"
 import { getAdminSession } from "@/lib/admin"
 import { sendEmail } from "@/lib/messaging"
 import {
@@ -26,15 +26,27 @@ export type EmailableVenue = {
   email: string
   status: string
   category: string | null
+  // Pre-computed display order (1 = highest). Signups sort to the top.
+  priority: number
+  confidence: string | null
+  // false = no valid email; Send/Resend is disabled and it's excluded from bulk.
+  emailable: boolean
+  // Outreach tracking, persisted on the directory row.
+  timesSent: number
+  lastSentAt: string | null
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 /**
- * Returns every venue we can email — researched directory prospects plus
- * venues that submitted the signup form. Rows without a valid email are
- * dropped, and duplicates (same email) are collapsed to a single recipient
- * (preferring the record with the richer contact name) so nobody is double-sent.
+ * Returns every venue in the directory plus venues that submitted the signup
+ * form. Rows flagged `emailable: false` (no valid email) are kept but marked so
+ * the UI can disable sending and exclude them from bulk. Emailable duplicates
+ * (same email) are collapsed to a single recipient (preferring the record with
+ * the richer contact name) so nobody is double-sent.
+ *
+ * Ordering is by the pre-computed `priority` field (1 = highest); signups sort
+ * to the very top. We never re-derive the order.
  */
 export async function getEmailableVenues(): Promise<EmailableVenue[]> {
   await assertAdmin()
@@ -48,9 +60,14 @@ export async function getEmailableVenues(): Promise<EmailableVenue[]> {
         email: venueDirectory.email,
         status: venueDirectory.status,
         category: venueDirectory.category,
+        priority: venueDirectory.priority,
+        confidence: venueDirectory.confidence,
+        emailable: venueDirectory.emailable,
+        timesSent: venueDirectory.timesSent,
+        lastSentAt: venueDirectory.lastSentAt,
       })
       .from(venueDirectory)
-      .orderBy(desc(venueDirectory.updatedAt)),
+      .orderBy(venueDirectory.priority),
     db
       .select({
         id: venueSignups.id,
@@ -64,47 +81,66 @@ export async function getEmailableVenues(): Promise<EmailableVenue[]> {
       .orderBy(desc(venueSignups.createdAt)),
   ])
 
+  // Emailable recipients are de-duplicated by email; non-emailable rows are
+  // always kept individually (they have no/invalid email to dedupe on).
   const byEmail = new Map<string, EmailableVenue>()
+  const nonEmailable: EmailableVenue[] = []
 
   const add = (v: EmailableVenue) => {
+    if (!v.emailable) {
+      nonEmailable.push(v)
+      return
+    }
     const email = v.email.trim().toLowerCase()
-    if (!EMAIL_RE.test(email)) return
     const existing = byEmail.get(email)
     if (!existing) {
       byEmail.set(email, v)
       return
     }
-    // Keep whichever has a real contact name; otherwise keep the first seen.
+    // Keep whichever has a real contact name; otherwise keep the higher priority.
     if (!existing.contactName && v.contactName) byEmail.set(email, v)
   }
 
   for (const r of dir) {
+    const email = (r.email ?? "").trim()
     add({
       key: `directory:${r.id}`,
       source: "directory",
       id: r.id,
       venueName: r.name,
       contactName: r.owner ?? "",
-      email: r.email ?? "",
+      email,
       status: r.status,
       category: r.category,
+      priority: r.priority ?? Number.MAX_SAFE_INTEGER,
+      confidence: r.confidence,
+      emailable: r.emailable && EMAIL_RE.test(email),
+      timesSent: r.timesSent ?? 0,
+      lastSentAt: r.lastSentAt ? r.lastSentAt.toISOString() : null,
     })
   }
   for (const r of signs) {
+    const email = (r.email ?? "").trim()
     add({
       key: `signup:${r.id}`,
       source: "signup",
       id: r.id,
       venueName: r.venueName,
       contactName: r.contactName,
-      email: r.email,
+      email,
       status: r.status,
       category: r.venueType ?? null,
+      // Signups are our warmest leads — float them above the directory.
+      priority: -1,
+      confidence: null,
+      emailable: EMAIL_RE.test(email),
+      timesSent: 0,
+      lastSentAt: null,
     })
   }
 
-  return [...byEmail.values()].sort((a, b) =>
-    a.venueName.localeCompare(b.venueName),
+  return [...byEmail.values(), ...nonEmailable].sort(
+    (a, b) => a.priority - b.priority || a.venueName.localeCompare(b.venueName),
   )
 }
 
@@ -112,7 +148,8 @@ export async function getEmailableVenues(): Promise<EmailableVenue[]> {
 async function resolveRecipients(keys: string[]) {
   const all = await getEmailableVenues()
   const want = new Set(keys)
-  return all.filter((v) => want.has(v.key))
+  // Never send to a non-emailable row even if its key is passed in.
+  return all.filter((v) => want.has(v.key) && v.emailable)
 }
 
 /**
@@ -182,7 +219,10 @@ export async function sendVenueCampaign(input: {
   if (!recipients.length) return { ok: false as const, error: "No valid recipients selected." }
 
   const baseHtml = buildVenueEmailHtml(input.content)
-  const directoryProspectIds: number[] = []
+  // Directory rows that were successfully emailed — bump their send tracking.
+  const sentDirectoryIds: number[] = []
+  // Of those, the ones still 'prospect' get advanced to 'pending'.
+  const prospectIds = new Set<number>()
 
   let sent = 0
   let failed = 0
@@ -202,8 +242,9 @@ export async function sendVenueCampaign(input: {
 
     if (res.ok) {
       sent++
-      if (r.source === "directory" && r.status === "prospect") {
-        directoryProspectIds.push(r.id)
+      if (r.source === "directory") {
+        sentDirectoryIds.push(r.id)
+        if (r.status === "prospect") prospectIds.add(r.id)
       }
     } else if ("skipped" in res && res.skipped) {
       skipped++
@@ -213,13 +254,19 @@ export async function sendVenueCampaign(input: {
     }
   }
 
-  // Advance freshly-contacted directory prospects to 'pending'.
-  if (directoryProspectIds.length) {
+  // Persist send tracking (timesSent + lastSentAt) and advance fresh prospects.
+  if (sentDirectoryIds.length) {
+    const now = new Date()
     await Promise.all(
-      directoryProspectIds.map((id) =>
+      sentDirectoryIds.map((id) =>
         db
           .update(venueDirectory)
-          .set({ status: "pending", updatedAt: new Date() })
+          .set({
+            timesSent: sql`${venueDirectory.timesSent} + 1`,
+            lastSentAt: now,
+            status: prospectIds.has(id) ? "pending" : undefined,
+            updatedAt: now,
+          })
           .where(eq(venueDirectory.id, id)),
       ),
     )

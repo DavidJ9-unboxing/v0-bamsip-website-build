@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db"
 import { venueDirectory, venueSignups } from "@/lib/db/schema"
-import { and, desc, eq, ilike, or, sql } from "drizzle-orm"
+import { and, eq, ilike, or, sql } from "drizzle-orm"
 import { getAdminSession } from "@/lib/admin"
 import { revalidatePath } from "next/cache"
 
@@ -148,7 +148,8 @@ export async function listDirectory(opts?: {
     .select()
     .from(venueDirectory)
     .where(conds.length ? and(...conds) : undefined)
-    .orderBy(desc(venueDirectory.confidence), venueDirectory.name)
+    // Always display by the pre-computed priority (1 = highest). NULLs last.
+    .orderBy(sql`${venueDirectory.priority} asc nulls last`, venueDirectory.name)
     .limit(1000)
 }
 

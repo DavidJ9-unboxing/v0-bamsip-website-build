@@ -145,57 +145,62 @@ export async function registerVenue(input: {
   if (!input.venueName.trim() || !input.contactName.trim() || !email)
     return { ok: false, error: "Venue name, contact and email are required." }
 
-  const existing = await db
-    .select({ id: venueSignups.id })
-    .from(venueSignups)
-    .where(eq(sql`lower(${venueSignups.email})`, email))
-    .limit(1)
-  if (existing.length) return { ok: true, error: "already-registered" }
-
-  const confirmToken = generateToken()
-
-  const [row] = await db
-    .insert(venueSignups)
-    .values({
-      venueName: input.venueName.trim(),
-      contactName: input.contactName.trim(),
-      email,
-      phone: input.phone?.trim() || null,
-      role: input.role || null,
-      smsOptIn: Boolean(input.smsOptIn),
-      venueType: input.venueType || null,
-      goal: input.goal || null,
-      challenge: input.challenge?.trim() || null,
-      confirmToken,
-      status: "pending",
-      source: "web",
-    })
-    .returning({ id: venueSignups.id })
-
-  // Try to merge this signup into our researched directory (mark as 'pending').
-  // No outbound contact is triggered from the directory here.
   try {
-    await linkSignupToDirectory(row.id, {
-      venueName: input.venueName.trim(),
-      email,
-      phone: input.phone?.trim() || null,
+    const existing = await db
+      .select({ id: venueSignups.id })
+      .from(venueSignups)
+      .where(eq(sql`lower(${venueSignups.email})`, email))
+      .limit(1)
+    if (existing.length) return { ok: true, error: "already-registered" }
+
+    const confirmToken = generateToken()
+
+    const [row] = await db
+      .insert(venueSignups)
+      .values({
+        venueName: input.venueName.trim(),
+        contactName: input.contactName.trim(),
+        email,
+        phone: input.phone?.trim() || null,
+        role: input.role || null,
+        smsOptIn: Boolean(input.smsOptIn),
+        venueType: input.venueType || null,
+        goal: input.goal || null,
+        challenge: input.challenge?.trim() || null,
+        confirmToken,
+        status: "pending",
+        source: "web",
+      })
+      .returning({ id: venueSignups.id })
+
+    // Try to merge this signup into our researched directory (mark as 'pending').
+    // No outbound contact is triggered from the directory here.
+    try {
+      await linkSignupToDirectory(row.id, {
+        venueName: input.venueName.trim(),
+        email,
+        phone: input.phone?.trim() || null,
+      })
+    } catch (err) {
+      console.error("[v0] linkSignupToDirectory failed:", (err as Error)?.message)
+    }
+
+    const confirmUrl = `${getBaseUrl()}/confirm?type=venue&token=${confirmToken}`
+    await sendEmail({
+      to: email,
+      subject: "Thanks for your interest in BamSip for venues",
+      recipientType: "venue",
+      recipientId: row.id,
+      template: "venue-confirm",
+      html: venueConfirmEmail(input.contactName.trim(), input.venueName.trim(), confirmUrl),
+      text: `Hi ${input.contactName}, confirm your venue interest: ${confirmUrl}`,
     })
+
+    return { ok: true }
   } catch (err) {
-    console.error("[v0] linkSignupToDirectory failed:", (err as Error)?.message)
+    console.error("[v0] registerVenue THREW:", (err as Error)?.message, (err as Error)?.stack)
+    return { ok: false, error: "something went wrong" }
   }
-
-  const confirmUrl = `${getBaseUrl()}/confirm?type=venue&token=${confirmToken}`
-  await sendEmail({
-    to: email,
-    subject: "Thanks for your interest in BamSip for venues",
-    recipientType: "venue",
-    recipientId: row.id,
-    template: "venue-confirm",
-    html: venueConfirmEmail(input.contactName.trim(), input.venueName.trim(), confirmUrl),
-    text: `Hi ${input.contactName}, confirm your venue interest: ${confirmUrl}`,
-  })
-
-  return { ok: true }
 }
 
 /* ----------------------------- Confirmation ---------------------------- */

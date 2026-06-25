@@ -62,6 +62,7 @@ export function SignupForm({ variant, headline }: SignupFormProps) {
     : "min-h-[72px] rounded-xl border-hairline bg-ink3 text-cream placeholder:text-mute focus:border-flame focus:ring-flame"
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [alreadyRegistered, setAlreadyRegistered] = useState(false)
   const [shareUrl, setShareUrl] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const [referredBy, setReferredBy] = useState<string | undefined>(undefined)
@@ -120,6 +121,7 @@ export function SignupForm({ variant, headline }: SignupFormProps) {
             `${window.location.origin}/bammers?ref=${res.referralCode}`,
           )
         }
+        if (res.error === "already-registered") setAlreadyRegistered(true)
         setIsSuccess(true)
         bammerForm.reset()
       } else {
@@ -140,6 +142,7 @@ export function SignupForm({ variant, headline }: SignupFormProps) {
     try {
       const res = await registerVenue(data)
       if (res.ok) {
+        if (res.error === "already-registered") setAlreadyRegistered(true)
         setIsSuccess(true)
         venueForm.reset()
       } else {
@@ -181,15 +184,21 @@ export function SignupForm({ variant, headline }: SignupFormProps) {
           <Check className="h-8 w-8 text-success" />
         </div>
         <h3 className="mb-2 text-xl font-bold text-cream">
-          {variant === "bammer" ? "check your email." : "we'll be in touch."}
+          {alreadyRegistered
+            ? "you're already on the list."
+            : variant === "bammer"
+              ? "check your email."
+              : "we'll be in touch."}
         </h3>
         <p className="text-sm text-cream2">
-          {variant === "bammer"
-            ? "We've sent a link to confirm your spot. Click it and you're in."
-            : "Confirm via the email we just sent and our team will reach out."}
+          {alreadyRegistered
+            ? "This email is already registered, so we haven't added a duplicate. If you need to update your details, just get in touch."
+            : variant === "bammer"
+              ? "We've sent a link to confirm your spot. Click it and you're in."
+              : "Confirm via the email we just sent and our team will reach out."}
         </p>
 
-        {variant === "bammer" && shareUrl && (
+        {!alreadyRegistered && variant === "bammer" && shareUrl && (
           <div className="mt-6 rounded-xl border border-flame/30 bg-ink2 p-4 text-left">
             <p className="mb-2 text-xs font-medium text-flame">
               earn £5 for every 50 mates who join

@@ -159,18 +159,22 @@ export function defaultVenueLaunchContent(ctaUrl: string): VenueEmailContent {
   return {
     mode: "template",
     heroUrl: VENUE_LAUNCH_HERO,
-    headline: "we're picking four venues. first round's on us.",
+    headline: "fancy 100 first-time guests, first round on us?",
     body: `Hi {{venueName}},
 
 {{hook}}
 
-We're launching BamSip in Manchester this July, and we're choosing four venues to host a launch night. {{venueName}} is exactly the kind of room we have in mind.
+Quick one. We're BamSip, Manchester's new nightlife app built to fill your quiet nights: you set a deal, we send the crowd, and the data shows what worked.
 
-Here's the deal: we bring the crowd and buy the first round for the first 100 people through the door. It runs on Stripe and lands straight in your till, so to you it's just a busy night taking normal tap payments. One drink each on us, then it's a full bar on their own money.
+We're launching this summer and picking four venues for a launch night. We bring the crowd and buy the first round for the first 100 through your door, then they drink on at an app discount for two hours, all paid straight to your till on Stripe like any normal tap payment.
 
-All we ask in return is a genuine discount on that first round. It's a friends-and-family launch for us, as much PR as party, and a packed room on a night that might otherwise be quiet.
+BamSip is always free to you: no subscription, no lock-in. The only thing you spend is the discount you put into an offer, as often as you like.
 
-Want one of the four slots? Just reply, or register your interest below and we'll send dates.`,
+Four slots. Fancy one? Reply "interested" and I'll send dates, or register {{venueName}} below before the city goes live.
+
+Cheers,
+[name]
+BamSip · smarter nights out`,
     ctaLabel: "register your interest",
     ctaUrl: "https://www.bamsip.com/venues#interest",
   }

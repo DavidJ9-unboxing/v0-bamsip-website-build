@@ -47,7 +47,6 @@ import {
   CheckCircle2,
   Store,
   BookMarked,
-  RotateCw,
   Clock,
   Ban,
   Check,
@@ -276,45 +275,6 @@ export function VenueEmailComposer({
     })
   }
 
-  // ---- per-row send / resend ----
-  const [rowSending, setRowSending] = useState<string | null>(null)
-  const [resendTarget, setResendTarget] = useState<EmailableVenue | null>(null)
-
-  const rowCanSend = subject.trim().length > 0 && contentReady
-
-  const sendToOne = (v: EmailableVenue) => {
-    if (!v.emailable || !rowCanSend) return
-    setResult(null)
-    setRowSending(v.key)
-    startSending(async () => {
-      const res = await sendVenueCampaign({
-        recipientKeys: [v.key],
-        subject,
-        content: buildContent(),
-      })
-      setRowSending(null)
-      setResendTarget(null)
-      if (!res.ok && "error" in res) {
-        setResult(res.error ?? "Send failed.")
-        return
-      }
-      if (res.sent > 0) {
-        markSent(v)
-        setResult(`Sent to ${v.venueName}.`)
-      } else if (res.skipped) {
-        setResult(`Skipped ${v.venueName} — email isn't configured yet.`)
-      } else {
-        setResult(`Couldn't send to ${v.venueName}.`)
-      }
-      router.refresh()
-    })
-  }
-
-  // First send goes straight through; a resend asks for confirmation first.
-  const handleRowSend = (v: EmailableVenue) => {
-    if (v.timesSent > 0) setResendTarget(v)
-    else sendToOne(v)
-  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -410,7 +370,6 @@ export function VenueEmailComposer({
             {filtered.length ? (
               filtered.map((v) => {
                 const checked = selected.has(v.key)
-                const sending = rowSending === v.key
                 return (
                   <div
                     key={v.key}
@@ -470,35 +429,6 @@ export function VenueEmailComposer({
                         )}
                       </div>
                     </div>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      disabled={!v.emailable || !rowCanSend || isSending}
-                      onClick={() => handleRowSend(v)}
-                      title={
-                        v.emailable
-                          ? rowCanSend
-                            ? undefined
-                            : "Add a subject and body first"
-                          : "No valid email"
-                      }
-                      className="h-8 shrink-0 border-hairline px-2.5 text-xs"
-                    >
-                      {sending ? (
-                        "Sending…"
-                      ) : v.timesSent > 0 ? (
-                        <>
-                          <RotateCw className="h-3.5 w-3.5" />
-                          Resend
-                        </>
-                      ) : (
-                        <>
-                          <Send className="h-3.5 w-3.5" />
-                          Send
-                        </>
-                      )}
-                    </Button>
                   </div>
                 )
               })
@@ -792,46 +722,6 @@ export function VenueEmailComposer({
             >
               <Send className="h-4 w-4" />
               {isSending ? "Sending…" : "Confirm & send"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* resend confirm dialog */}
-      <Dialog open={!!resendTarget} onOpenChange={(o) => !o && setResendTarget(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Resend to this venue?</DialogTitle>
-            <DialogDescription>
-              {resendTarget && (
-                <>
-                  You&apos;ve already emailed{" "}
-                  <strong className="text-cream">{resendTarget.venueName}</strong>{" "}
-                  {resendTarget.timesSent}{" "}
-                  time{resendTarget.timesSent === 1 ? "" : "s"}
-                  {resendTarget.lastSentAt
-                    ? ` (last ${formatSent(resendTarget.lastSentAt)})`
-                    : ""}
-                  . Send the current email again?
-                </>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setResendTarget(null)}
-              className="border-hairline"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => resendTarget && sendToOne(resendTarget)}
-              disabled={isSending}
-              className="bg-flame text-cream hover:bg-flame-soft"
-            >
-              <RotateCw className="h-4 w-4" />
-              {isSending ? "Sending…" : "Confirm & resend"}
             </Button>
           </DialogFooter>
         </DialogContent>

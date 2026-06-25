@@ -11,6 +11,7 @@ import {
 import {
   VENUE_LAUNCH_HERO,
   VENUE_LAUNCH_SUBJECT,
+  VENUE_LAUNCH_SUBJECTS,
   defaultVenueLaunchContent,
   type VenueEmailContent,
 } from "@/lib/email-templates"
@@ -149,7 +150,7 @@ export function VenueEmailComposer({
   // ---- compose ----
   const defaultContent = defaultVenueLaunchContent(defaultCtaUrl)
   const [mode, setMode] = useState<Mode>("template")
-  const [subject, setSubject] = useState(VENUE_LAUNCH_SUBJECT)
+  const [subject, setSubject] = useState<string>(VENUE_LAUNCH_SUBJECT)
   const initial = defaultContent.mode === "template" ? defaultContent : null
   const [heroUrl, setHeroUrl] = useState(initial?.heroUrl ?? VENUE_LAUNCH_HERO)
   const [headline, setHeadline] = useState(initial?.headline ?? "")
@@ -487,6 +488,30 @@ export function VenueEmailComposer({
               onChange={(e) => setSubject(e.target.value)}
               placeholder="{{venueName}} x BamSip"
             />
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs text-mute">A/B test variants — click to use:</span>
+              <div className="flex flex-wrap gap-1.5">
+                {VENUE_LAUNCH_SUBJECTS.map((s, i) => {
+                  const active = subject === s
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setSubject(s)}
+                      className={`rounded-full border px-2.5 py-1 text-left text-xs transition-colors ${
+                        active
+                          ? "border-flame bg-flame/15 text-flame"
+                          : "border-hairline bg-ink text-cream2 hover:bg-ink3"
+                      }`}
+                      title={s}
+                    >
+                      <span className="font-medium">{String.fromCharCode(65 + i)}</span>
+                      <span className="ml-1.5 text-mute">{s}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
           </div>
 
           {/* mode toggle */}

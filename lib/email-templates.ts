@@ -123,9 +123,19 @@ export function buildVenueEmailHtml(content: VenueEmailContent) {
     ${SHELL_CLOSE}`
 }
 
+/**
+ * Subject lines we're A/B testing for the venue launch campaign. Each supports
+ * the {{venueName}} token. The first is the default. Keep these in one place so
+ * the composer can offer them as one-click presets.
+ */
+export const VENUE_LAUNCH_SUBJECTS = [
+  "{{venueName}}, the first round's on us",
+  "buying the first 100 drinks at {{venueName}}?",
+  "we'll fill your quietest night at {{venueName}}",
+] as const
+
 /** Sensible default subject for the venue launch campaign (with token). */
-export const VENUE_LAUNCH_SUBJECT =
-  "{{venueName}}: first round's on us?"
+export const VENUE_LAUNCH_SUBJECT = VENUE_LAUNCH_SUBJECTS[0]
 
 /** Default branded template content for the venue launch campaign. */
 export function defaultVenueLaunchContent(ctaUrl: string): VenueEmailContent {

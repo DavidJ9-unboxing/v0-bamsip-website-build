@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, useTransition } from "react"
+import { useEffect, useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import {
   sendVenueCampaign,
@@ -68,6 +68,10 @@ export function VenueEmailComposer({
 }) {
   const router = useRouter()
   const [isSending, startSending] = useTransition()
+  // Relative timestamps depend on the browser's clock/locale, so only render
+  // them after mount to avoid an SSR/client hydration mismatch.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
   // ---- recipients ----
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -426,7 +430,7 @@ export function VenueEmailComposer({
                             <Ban className="h-3 w-3" /> no valid email
                           </span>
                         )}
-                        {v.lastSentAt && (
+                        {mounted && v.lastSentAt && (
                           <span className="inline-flex shrink-0 items-center gap-1">
                             <Clock className="h-3 w-3" />
                             {formatSent(v.lastSentAt)}

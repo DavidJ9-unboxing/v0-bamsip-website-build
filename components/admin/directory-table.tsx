@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, useTransition } from "react"
+import { useEffect, useMemo, useState, useTransition } from "react"
 import {
   updateDirectoryVenue,
   deleteDirectoryVenue,
@@ -91,6 +91,10 @@ export function DirectoryTable({
   const [status, setStatus] = useState<string>("all")
   const [category, setCategory] = useState<string>("all")
   const [selected, setSelected] = useState<Directory | null>(null)
+  // Relative timestamps depend on the browser's clock/locale, so only render
+  // them after mount to avoid an SSR/client hydration mismatch.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim()
@@ -258,7 +262,7 @@ export function DirectoryTable({
                           <Check className="h-3 w-3" />
                           Sent{r.timesSent > 1 ? ` ${r.timesSent}×` : ""}
                         </span>
-                        {r.lastSentAt && (
+                        {mounted && r.lastSentAt && (
                           <span className="pl-1 text-[10px] text-mute">
                             {formatSent(r.lastSentAt)}
                           </span>

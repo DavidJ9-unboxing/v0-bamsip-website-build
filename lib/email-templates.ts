@@ -143,7 +143,7 @@ export function defaultVenueLaunchContent(ctaUrl: string): VenueEmailContent {
     mode: "template",
     heroUrl: VENUE_LAUNCH_HERO,
     headline: "we're picking four venues. first round's on us.",
-    body: `Hi {{contactName}},
+    body: `Hi {{venueName}},
 
 We're launching BamSip in Manchester this July, and we're choosing four venues to host a launch night. {{venueName}} is exactly the kind of room we have in mind.
 

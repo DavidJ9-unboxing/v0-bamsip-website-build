@@ -180,12 +180,16 @@ export async function sendVenueTest(input: {
   testEmail: string
   subject: string
   content: VenueEmailContent
+  sample?: { venueName: string; contactName: string }
 }) {
   await assertAdmin()
   const to = input.testEmail.trim()
   if (!EMAIL_RE.test(to)) return { ok: false as const, error: "Enter a valid test email." }
 
-  const vars = { venueName: "The Northern Tap", contactName: "Alex" }
+  const vars = {
+    venueName: input.sample?.venueName || "The Northern Tap",
+    contactName: input.sample?.contactName || "Alex",
+  }
   const res = await sendEmail({
     to,
     subject: `[TEST] ${applyVenueTokens(input.subject, vars)}`,

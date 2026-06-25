@@ -172,9 +172,34 @@ export function VenueEmailComposer({
   const [previewOpen, setPreviewOpen] = useState(false)
   const [preview, setPreview] = useState<{ subject: string; html: string } | null>(null)
   const [previewing, startPreview] = useTransition()
+  // Which venue the live preview/test personalizes to. Defaults to the first
+  // selected recipient, but you can preview as any venue.
+  const [previewKey, setPreviewKey] = useState<string>("")
+
+  // Venue the preview personalizes to: the explicitly chosen one, else the
+  // first selected recipient, else the first venue in the list.
+  const previewVenue = useMemo(() => {
+    if (previewKey) {
+      const byKey = venues.find((v) => v.key === previewKey)
+      if (byKey) return byKey
+    }
+    return venues.find((v) => selected.has(v.key)) ?? venues[0]
+  }, [venues, selected, previewKey])
+
+  // Options for the "Preview as" picker: selected recipients first, then the
+  // rest of the list. Capped so the dropdown stays light with 500+ venues.
+  const previewOptions = useMemo(() => {
+    const chosen = venues.filter((v) => selected.has(v.key))
+    const rest = venues.filter((v) => !selected.has(v.key))
+    const merged = [...chosen, ...rest].slice(0, 200)
+    // Always keep the currently-previewed venue available as an option.
+    if (previewVenue && !merged.some((v) => v.key === previewVenue.key)) {
+      merged.unshift(previewVenue)
+    }
+    return merged
+  }, [venues, selected, previewVenue])
 
   const openPreview = () => {
-    const sample = venues.find((v) => selected.has(v.key)) ?? venues[0]
     setPreviewOpen(true)
     setPreview(null)
     startPreview(async () => {
@@ -182,8 +207,8 @@ export function VenueEmailComposer({
         subject,
         content: buildContent(),
         sample: {
-          venueName: sample?.venueName ?? "",
-          contactName: sample?.contactName ?? "",
+          venueName: previewVenue?.venueName ?? "",
+          contactName: previewVenue?.contactName ?? "",
         },
       })
       setPreview(res)
@@ -198,7 +223,15 @@ export function VenueEmailComposer({
   const sendTest = () => {
     setTestMsg(null)
     startTest(async () => {
-      const res = await sendVenueTest({ testEmail, subject, content: buildContent() })
+      const res = await sendVenueTest({
+        testEmail,
+        subject,
+        content: buildContent(),
+        sample: {
+          venueName: previewVenue?.venueName ?? "",
+          contactName: previewVenue?.contactName ?? "",
+        },
+      })
       setTestMsg(
         res.ok
           ? { ok: true, text: `Test sent to ${testEmail}.` }
@@ -630,16 +663,41 @@ export function VenueEmailComposer({
             </div>
           )}
 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={openPreview}
-            className="border-hairline"
-            disabled={!contentReady}
-          >
-            <Eye className="h-4 w-4" />
-            Preview
-          </Button>
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-cream2">Preview as</Label>
+            <div className="flex gap-2">
+              <Select
+                value={previewVenue?.key ?? ""}
+                onValueChange={setPreviewKey}
+              >
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Pick a venue to personalize for" />
+                </SelectTrigger>
+                <SelectContent>
+                  {previewOptions.map((v) => (
+                    <SelectItem key={v.key} value={v.key}>
+                      {v.venueName}
+                      {v.contactName ? ` — ${v.contactName}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={openPreview}
+                className="shrink-0 border-hairline"
+                disabled={!contentReady}
+              >
+                <Eye className="h-4 w-4" />
+                Preview
+              </Button>
+            </div>
+            <p className="text-xs text-mute">
+              Tokens fill in for this venue. Defaults to your first selected
+              recipient.
+            </p>
+          </div>
 
           {/* test send */}
           <div className="rounded-xl border border-hairline bg-ink p-3">

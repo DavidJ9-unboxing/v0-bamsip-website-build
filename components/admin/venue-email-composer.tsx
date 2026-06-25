@@ -373,11 +373,20 @@ export function VenueEmailComposer({
                 return (
                   <div
                     key={v.key}
+                    role={v.emailable ? "button" : undefined}
+                    tabIndex={v.emailable ? 0 : undefined}
+                    onClick={() => v.emailable && toggle(v.key)}
+                    onKeyDown={(e) => {
+                      if (v.emailable && (e.key === "Enter" || e.key === " ")) {
+                        e.preventDefault()
+                        toggle(v.key)
+                      }
+                    }}
                     className={`flex items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-colors ${
                       checked
                         ? "border-flame/40 bg-flame/10"
                         : v.emailable
-                          ? "border-hairline bg-ink hover:bg-ink3"
+                          ? "cursor-pointer border-hairline bg-ink hover:bg-ink3"
                           : "border-hairline bg-ink/60"
                     }`}
                   >
@@ -386,6 +395,8 @@ export function VenueEmailComposer({
                       disabled={!v.emailable}
                       onCheckedChange={() => v.emailable && toggle(v.key)}
                       aria-label={`Select ${v.venueName}`}
+                      tabIndex={-1}
+                      className="pointer-events-none"
                     />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">

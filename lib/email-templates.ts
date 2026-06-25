@@ -55,17 +55,34 @@ export const VENUE_LAUNCH_HERO =
 export type VenueEmailVars = {
   venueName: string
   contactName: string
+  /** Per-venue humorous opener. When empty, its line is removed entirely. */
+  hook?: string
 }
 
 /**
- * Replaces {{venueName}}, {{contactName}} and {{firstName}} tokens. Substituted
- * values are HTML-escaped so a venue/contact name can never break the markup.
+ * Replaces {{venueName}}, {{contactName}}, {{firstName}} and {{hook}} tokens.
+ * Substituted values are HTML-escaped so a venue/contact name can never break
+ * the markup. The {{hook}} token is special: when no hook is provided, the whole
+ * paragraph (or line) holding it is removed so there's never an empty gap.
  */
 export function applyVenueTokens(input: string, vars: VenueEmailVars) {
   const venue = escapeHtml(vars.venueName || "your venue")
   const contact = escapeHtml(vars.contactName || "there")
   const first = escapeHtml((vars.contactName || "there").split(/\s+/)[0])
-  return input
+  const hook = vars.hook ? escapeHtml(vars.hook) : ""
+
+  let out = input
+  if (hook) {
+    out = out.replace(/\{\{\s*hook\s*\}\}/gi, hook)
+  } else {
+    // Drop a paragraph that holds only the hook token (HTML), then strip any
+    // bare token left over (e.g. in plain-text bodies/subjects).
+    out = out
+      .replace(/<p[^>]*>\s*\{\{\s*hook\s*\}\}\s*<\/p>\s*/gi, "")
+      .replace(/\{\{\s*hook\s*\}\}/gi, "")
+  }
+
+  return out
     .replace(/\{\{\s*venueName\s*\}\}/gi, venue)
     .replace(/\{\{\s*contactName\s*\}\}/gi, contact)
     .replace(/\{\{\s*firstName\s*\}\}/gi, first)
@@ -144,6 +161,8 @@ export function defaultVenueLaunchContent(ctaUrl: string): VenueEmailContent {
     heroUrl: VENUE_LAUNCH_HERO,
     headline: "we're picking four venues. first round's on us.",
     body: `Hi {{venueName}},
+
+{{hook}}
 
 We're launching BamSip in Manchester this July, and we're choosing four venues to host a launch night. {{venueName}} is exactly the kind of room we have in mind.
 

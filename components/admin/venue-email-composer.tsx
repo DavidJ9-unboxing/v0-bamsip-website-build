@@ -7,6 +7,7 @@ import {
   sendVenueTest,
   renderVenuePreview,
   type EmailableVenue,
+  type VenueOverride,
 } from "@/app/actions/venue-email"
 import {
   VENUE_LAUNCH_HERO,
@@ -50,6 +51,8 @@ import {
   Clock,
   Ban,
   Check,
+  Sparkles,
+  Pencil,
 } from "lucide-react"
 
 type Mode = "template" | "html"
@@ -167,6 +170,20 @@ export function VenueEmailComposer({
       ? { mode: "html", rawHtml }
       : { mode: "template", heroUrl, headline, body, ctaLabel, ctaUrl }
 
+  // ---- per-venue overrides (keyed by venue.key) ----
+  // An override fully supersedes the master template for that one venue.
+  const [overrides, setOverrides] = useState<Record<string, VenueOverride>>({})
+
+  const setOverride = (key: string, patch: Partial<VenueOverride> | null) =>
+    setOverrides((prev) => {
+      if (patch === null) {
+        const next = { ...prev }
+        delete next[key]
+        return next
+      }
+      return { ...prev, [key]: { ...prev[key], ...patch } }
+    })
+
   // ---- preview ----
   const [previewOpen, setPreviewOpen] = useState(false)
   const [preview, setPreview] = useState<{ subject: string; html: string } | null>(null)
@@ -198,6 +215,26 @@ export function VenueEmailComposer({
     return merged
   }, [venues, selected, previewVenue])
 
+  // Manual override for the venue currently being previewed (if any).
+  const currentOverride = previewVenue ? overrides[previewVenue.key] : undefined
+
+  // Seeds an editable override from what this venue would otherwise receive:
+  // the tailored subject/hero (or master), with its hook woven into the body.
+  const seedOverride = (v: EmailableVenue) => {
+    const t = v.tailoring
+    setOverride(v.key, {
+      subject: t?.subject ?? subject,
+      body:
+        mode === "template"
+          ? body
+              .replace(/\{\{\s*hook\s*\}\}/gi, t?.hook ?? "")
+              .replace(/\n{3,}/g, "\n\n")
+              .trim()
+          : "",
+      heroUrl: mode === "template" ? t?.heroImage ?? heroUrl : "",
+    })
+  }
+
   const openPreview = () => {
     setPreviewOpen(true)
     setPreview(null)
@@ -209,6 +246,10 @@ export function VenueEmailComposer({
           venueName: previewVenue?.venueName ?? "",
           contactName: previewVenue?.contactName ?? "",
         },
+        venue: previewVenue
+          ? { source: previewVenue.source, id: previewVenue.id }
+          : undefined,
+        override: previewVenue ? overrides[previewVenue.key] : undefined,
       })
       setPreview(res)
     })
@@ -230,6 +271,10 @@ export function VenueEmailComposer({
           venueName: previewVenue?.venueName ?? "",
           contactName: previewVenue?.contactName ?? "",
         },
+        venue: previewVenue
+          ? { source: previewVenue.source, id: previewVenue.id }
+          : undefined,
+        override: previewVenue ? overrides[previewVenue.key] : undefined,
       })
       setTestMsg(
         res.ok
@@ -255,6 +300,7 @@ export function VenueEmailComposer({
         recipientKeys: keys,
         subject,
         content: buildContent(),
+        overrides,
       })
       setConfirmOpen(false)
       if (!res.ok && "error" in res) {
@@ -639,6 +685,110 @@ export function VenueEmailComposer({
               recipient.
             </p>
           </div>
+
+          {/* selected venue tailoring */}
+          {previewVenue && (
+            <div className="rounded-xl border border-hairline bg-ink p-3">
+              <div className="flex items-center justify-between gap-2">
+                <Label className="text-cream2">This venue</Label>
+                {previewVenue.tailoring ? (
+                  <Badge className="gap-1 border-flame/40 bg-flame/15 text-flame">
+                    <Sparkles className="h-3 w-3" />
+                    Tailored
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="border-hairline text-mute">
+                    Generic template
+                  </Badge>
+                )}
+              </div>
+              <p className="mt-1 text-sm font-medium text-cream">
+                {previewVenue.venueName}
+              </p>
+
+              {previewVenue.tailoring && (
+                <div className="mt-2 flex flex-col gap-2">
+                  <p className="text-xs italic leading-relaxed text-cream2">
+                    {`"${previewVenue.tailoring.hook}"`}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={previewVenue.tailoring.heroImage || "/placeholder.svg"}
+                      alt={previewVenue.tailoring.heroAlt}
+                      className="h-12 w-20 shrink-0 rounded-md object-cover ring-1 ring-hairline"
+                    />
+                    <span className="break-all text-[11px] text-mute">
+                      {previewVenue.tailoring.heroImage}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              <p className="mt-2 text-xs text-mute">
+                Subject:{" "}
+                <span className="text-cream2">
+                  {currentOverride?.subject ??
+                    previewVenue.tailoring?.subject ??
+                    subject}
+                </span>
+              </p>
+
+              {currentOverride ? (
+                <div className="mt-3 flex flex-col gap-2 rounded-lg border border-flame/30 bg-flame/5 p-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-cream2">
+                      Custom for this venue
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setOverride(previewVenue.key, null)}
+                      className="text-xs text-flame hover:underline"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <Input
+                    value={currentOverride.subject ?? ""}
+                    onChange={(e) =>
+                      setOverride(previewVenue.key, { subject: e.target.value })
+                    }
+                    placeholder="Custom subject"
+                  />
+                  {mode === "template" && (
+                    <>
+                      <Textarea
+                        value={currentOverride.body ?? ""}
+                        onChange={(e) =>
+                          setOverride(previewVenue.key, { body: e.target.value })
+                        }
+                        rows={6}
+                        placeholder="Custom body"
+                        className="font-mono text-xs"
+                      />
+                      <Input
+                        value={currentOverride.heroUrl ?? ""}
+                        onChange={(e) =>
+                          setOverride(previewVenue.key, { heroUrl: e.target.value })
+                        }
+                        placeholder="Custom hero image URL"
+                      />
+                    </>
+                  )}
+                </div>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => seedOverride(previewVenue)}
+                  className="mt-3 h-8 border-hairline px-2.5 text-xs"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                  Customise for this venue
+                </Button>
+              )}
+            </div>
+          )}
 
           {/* test send */}
           <div className="rounded-xl border border-hairline bg-ink p-3">

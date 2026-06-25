@@ -10,11 +10,27 @@ import {
   buildVenueEmailHtml,
   type VenueEmailContent,
 } from "@/lib/email-templates"
+import { resolveTailoring } from "@/lib/data/venue-tailoring"
 
 async function assertAdmin() {
   const session = await getAdminSession()
   if (!session) throw new Error("Unauthorized")
   return session.user
+}
+
+/** Resolved per-venue tailoring surfaced to the composer UI. */
+export type VenueTailoringInfo = {
+  hook: string
+  heroImage: string
+  heroAlt: string
+  subject?: string
+}
+
+/** Admin-authored override for a single venue. Supersedes the master template. */
+export type VenueOverride = {
+  subject?: string
+  body?: string
+  heroUrl?: string
 }
 
 export type EmailableVenue = {
@@ -34,9 +50,63 @@ export type EmailableVenue = {
   // Outreach tracking, persisted on the directory row.
   timesSent: number
   lastSentAt: string | null
+  // Curated per-venue tailoring (hook + custom hero), null when not tailored.
+  tailoring: VenueTailoringInfo | null
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+const SITE_ORIGIN = "https://www.bamsip.com"
+
+/** Turns a /public-relative hero path into an absolute URL for email clients. */
+function absoluteHero(path: string) {
+  if (!path) return path
+  if (/^https?:\/\//i.test(path)) return path
+  return `${SITE_ORIGIN}${path.startsWith("/") ? "" : "/"}${path}`
+}
+
+/**
+ * Builds the final subject + HTML for one recipient. Precedence:
+ *   subject: override → tailored subject → master subject
+ *   hero:    override → tailored hero → master hero
+ *   body:    override → master body (with {{hook}} woven in)
+ * The {{hook}} token resolves to this venue's curated hook, or collapses away.
+ */
+function renderForVenue(args: {
+  masterSubject: string
+  masterContent: VenueEmailContent
+  vars: { venueName: string; contactName: string }
+  source: "directory" | "signup"
+  id: number
+  override?: VenueOverride
+}) {
+  const t = args.source === "directory" ? resolveTailoring(args.id) : undefined
+  const o = args.override
+
+  let subject = args.masterSubject
+  if (t?.subject) subject = t.subject
+  if (o?.subject?.trim()) subject = o.subject
+
+  let content = args.masterContent
+  if (content.mode === "template") {
+    const heroUrl = o?.heroUrl?.trim()
+      ? absoluteHero(o.heroUrl.trim())
+      : t?.isTailored
+        ? absoluteHero(t.heroImage)
+        : content.heroUrl
+    content = {
+      ...content,
+      heroUrl,
+      body: o?.body?.trim() ? o.body : content.body,
+    }
+  }
+
+  const vars = { ...args.vars, hook: t?.hook ?? "" }
+  return {
+    subject: applyVenueTokens(subject, vars),
+    html: applyVenueTokens(buildVenueEmailHtml(content), vars),
+  }
+}
 
 /**
  * Returns every venue in the directory plus venues that submitted the signup
@@ -103,6 +173,7 @@ export async function getEmailableVenues(): Promise<EmailableVenue[]> {
 
   for (const r of dir) {
     const email = (r.email ?? "").trim()
+    const t = resolveTailoring(r.id)
     add({
       key: `directory:${r.id}`,
       source: "directory",
@@ -117,6 +188,9 @@ export async function getEmailableVenues(): Promise<EmailableVenue[]> {
       emailable: r.emailable && EMAIL_RE.test(email),
       timesSent: r.timesSent ?? 0,
       lastSentAt: r.lastSentAt ? r.lastSentAt.toISOString() : null,
+      tailoring: t.isTailored
+        ? { hook: t.hook, heroImage: t.heroImage, heroAlt: t.heroAlt, subject: t.subject }
+        : null,
     })
   }
   for (const r of signs) {
@@ -136,6 +210,7 @@ export async function getEmailableVenues(): Promise<EmailableVenue[]> {
       emailable: EMAIL_RE.test(email),
       timesSent: 0,
       lastSentAt: null,
+      tailoring: null,
     })
   }
 
@@ -160,16 +235,21 @@ export async function renderVenuePreview(input: {
   subject: string
   content: VenueEmailContent
   sample: { venueName: string; contactName: string }
+  venue?: { source: "directory" | "signup"; id: number }
+  override?: VenueOverride
 }) {
   await assertAdmin()
-  const vars = {
-    venueName: input.sample.venueName || "The Northern Tap",
-    contactName: input.sample.contactName || "Alex",
-  }
-  return {
-    subject: applyVenueTokens(input.subject, vars),
-    html: applyVenueTokens(buildVenueEmailHtml(input.content), vars),
-  }
+  return renderForVenue({
+    masterSubject: input.subject,
+    masterContent: input.content,
+    vars: {
+      venueName: input.sample.venueName || "The Northern Tap",
+      contactName: input.sample.contactName || "Alex",
+    },
+    source: input.venue?.source ?? "signup",
+    id: input.venue?.id ?? -1,
+    override: input.override,
+  })
 }
 
 /**
@@ -181,19 +261,28 @@ export async function sendVenueTest(input: {
   subject: string
   content: VenueEmailContent
   sample?: { venueName: string; contactName: string }
+  venue?: { source: "directory" | "signup"; id: number }
+  override?: VenueOverride
 }) {
   await assertAdmin()
   const to = input.testEmail.trim()
   if (!EMAIL_RE.test(to)) return { ok: false as const, error: "Enter a valid test email." }
 
-  const vars = {
-    venueName: input.sample?.venueName || "The Northern Tap",
-    contactName: input.sample?.contactName || "Alex",
-  }
+  const rendered = renderForVenue({
+    masterSubject: input.subject,
+    masterContent: input.content,
+    vars: {
+      venueName: input.sample?.venueName || "The Northern Tap",
+      contactName: input.sample?.contactName || "Alex",
+    },
+    source: input.venue?.source ?? "signup",
+    id: input.venue?.id ?? -1,
+    override: input.override,
+  })
   const res = await sendEmail({
     to,
-    subject: `[TEST] ${applyVenueTokens(input.subject, vars)}`,
-    html: applyVenueTokens(buildVenueEmailHtml(input.content), vars),
+    subject: `[TEST] ${rendered.subject}`,
+    html: rendered.html,
     recipientType: "admin",
     template: "venue-campaign-test",
   })
@@ -215,6 +304,8 @@ export async function sendVenueCampaign(input: {
   recipientKeys: string[]
   subject: string
   content: VenueEmailContent
+  // Per-venue overrides keyed by EmailableVenue.key (e.g. "directory:49").
+  overrides?: Record<string, VenueOverride>
 }) {
   await assertAdmin()
 
@@ -222,7 +313,6 @@ export async function sendVenueCampaign(input: {
   const recipients = await resolveRecipients(input.recipientKeys)
   if (!recipients.length) return { ok: false as const, error: "No valid recipients selected." }
 
-  const baseHtml = buildVenueEmailHtml(input.content)
   // Directory rows that were successfully emailed — bump their send tracking.
   const sentDirectoryIds: number[] = []
   // Of those, the ones still 'prospect' get advanced to 'pending'.
@@ -234,11 +324,18 @@ export async function sendVenueCampaign(input: {
   const errors: string[] = []
 
   for (const r of recipients) {
-    const vars = { venueName: r.venueName, contactName: r.contactName }
+    const rendered = renderForVenue({
+      masterSubject: input.subject,
+      masterContent: input.content,
+      vars: { venueName: r.venueName, contactName: r.contactName },
+      source: r.source,
+      id: r.id,
+      override: input.overrides?.[r.key],
+    })
     const res = await sendEmail({
       to: r.email,
-      subject: applyVenueTokens(input.subject, vars),
-      html: applyVenueTokens(baseHtml, vars),
+      subject: rendered.subject,
+      html: rendered.html,
       recipientType: "venue",
       recipientId: r.id,
       template: "venue-campaign",

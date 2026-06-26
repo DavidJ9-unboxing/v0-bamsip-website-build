@@ -37,6 +37,11 @@ export const TAILORED: Record<number, VenueTailoring> = {
     heroImage: "/images/venues/crazy-pedros.png",
     heroAlt: "A frosted margarita beside a single pizza slice on a dark, neon-lit bar.",
   }, // Crazy Pedro's
+  60: {
+    hook: "Five kitchens and a taproom under one roof is a serious operation to keep full. That's our whole pitch: pick a midweek offer, we send the crowd, and you see which kitchen and which deal pulled them in.",
+    heroImage: "/images/venues/society-manchester.png",
+    heroAlt: "A buzzing food-hall interior on Barbirolli Square with a central bar, multiple kitchens and warm lighting.",
+  }, // Society Manchester
   48: {
     hook: "570 gins is a number that mostly inspires indecision, so we'll make one choice easy: the first round's on us. That's your wall of bottles up top, made specially.",
     heroImage: "/images/venues/atlas-bar.png",

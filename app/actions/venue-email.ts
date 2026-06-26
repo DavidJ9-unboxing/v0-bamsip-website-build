@@ -81,9 +81,13 @@ function renderForVenue(args: {
   source: "directory" | "signup"
   id: number
   override?: VenueOverride
+  // Sent emails need absolute hero URLs; the in-app preview wants relative ones
+  // so images load from the running app instead of the (not-yet-deployed) site.
+  absolute?: boolean
 }) {
   const t = args.source === "directory" ? resolveTailoring(args.id) : undefined
   const o = args.override
+  const hero = args.absolute === false ? (p: string) => p : absoluteHero
 
   let subject = args.masterSubject
   if (t?.subject) subject = t.subject
@@ -92,9 +96,9 @@ function renderForVenue(args: {
   let content = args.masterContent
   if (content.mode === "template") {
     const heroUrl = o?.heroUrl?.trim()
-      ? absoluteHero(o.heroUrl.trim())
+      ? hero(o.heroUrl.trim())
       : t?.isTailored
-        ? absoluteHero(t.heroImage)
+        ? hero(t.heroImage)
         : content.heroUrl
     content = {
       ...content,
@@ -254,6 +258,8 @@ export async function renderVenuePreview(input: {
     source: input.venue?.source ?? "signup",
     id: input.venue?.id ?? -1,
     override: input.override,
+    // Keep hero paths relative so the in-app preview loads them locally.
+    absolute: false,
   })
 }
 

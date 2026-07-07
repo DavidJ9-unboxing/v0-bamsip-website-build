@@ -43,13 +43,13 @@ export function venueConfirmEmail(
 /* --------------------- Venue outreach / launch emails -------------------- */
 
 /**
- * Default hero used in venue outreach emails. Points at the live site asset.
- * If a custom hero is created later, upload it to
- * /public/images/email-venue-launch-hero.jpg and set the composer's hero field
- * to: https://www.bamsip.com/images/email-venue-launch-hero.jpg
+ * Default hero used in venue outreach emails for any venue WITHOUT its own
+ * tailored hero. This is the shared, generic "new design" frame (before/after
+ * split, coral divider, "100 first rounds on us") baked by
+ * scripts/build-venue-heroes.mjs, so every email is visually consistent.
+ * Relative path; the send action makes it absolute against the site origin.
  */
-export const VENUE_LAUNCH_HERO =
-  "https://www.bamsip.com/images/hero-night.png"
+export const VENUE_LAUNCH_HERO = "/images/email-venue-launch-hero.png"
 
 /** Personalisation tokens supported in venue email subjects and bodies. */
 export type VenueEmailVars = {

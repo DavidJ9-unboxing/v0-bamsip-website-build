@@ -19,13 +19,21 @@ const SRC = "scripts/venue-hero-sources"
 const OUT = "public/images/venues"
 
 // `name` is drawn into the right-hand value block, matching the `venueName`
-// prop of the <VenueHero /> React component.
+// prop of the <VenueHero /> React component. Provide `src`/`out` to override
+// the default paths (used for the shared generic hero). When `name` is omitted
+// the venue-name line is left off — the frame stays generic.
 const VENUES = [
   { file: "joshua-brooks.png", name: "Joshua Brooks" },
   { file: "crazy-pedros.png", name: "Crazy Pedro's" },
   { file: "new-york-new-york.png", name: "New York New York" },
   { file: "twenty-twenty-two.png", name: "Twenty Twenty Two" },
   { file: "society-manchester.png", name: "Society Manchester" },
+  // Shared default hero for every venue WITHOUT its own photo. Uses the same
+  // new design (no venue name) so all outreach emails are visually consistent.
+  {
+    src: "public/images/hero-night.png",
+    out: "public/images/email-venue-launch-hero.png",
+  },
 ]
 
 // ── Bottom-up charcoal gradient (legibility) + slight top darken ──────────────
@@ -80,9 +88,9 @@ function frameSvg(name) {
     <text x="44" y="${H - 44}" font-family="${FONT}" font-weight="600" font-size="26" fill="${CREAM}" fill-opacity="0.8" letter-spacing="0.5" filter="${shadow}">a quiet tuesday</text>
     <text x="${HALF + 29}" y="${H - 44}" font-family="${FONT}" font-weight="800" font-size="26" fill="#FFFFFF" letter-spacing="0.5" filter="${shadow}">with bamsip</text>
 
-    <!-- right-hand value block: venue name, big coral "100", strapline -->
+    <!-- right-hand value block: venue name (optional), big coral "100", strapline -->
     <g text-anchor="end" filter="${shadow}">
-      <text x="${RX}" y="232" font-family="${FONT}" font-weight="600" font-size="31" fill="#FFFFFF" letter-spacing="-0.3">${esc(name)}</text>
+      ${name ? `<text x="${RX}" y="232" font-family="${FONT}" font-weight="600" font-size="31" fill="#FFFFFF" letter-spacing="-0.3">${esc(name)}</text>` : ""}
       <text x="${RX}" y="356" font-family="${FONT}" font-weight="800" font-size="132" fill="${CORAL_LIGHT}" letter-spacing="-4">100</text>
       <text x="${RX}" y="398" font-family="${FONT}" font-weight="600" font-size="28" fill="#FFFFFF" letter-spacing="-0.3">first rounds, on us</text>
       <text x="${RX}" y="424" font-family="${FONT}" font-weight="500" font-size="19" fill="${MUTED}">we bring the crowd — you set the offers</text>
@@ -90,9 +98,9 @@ function frameSvg(name) {
   </svg>`)
 }
 
-async function build({ file, name }) {
-  const src = `${SRC}/${file}`
-  const out = `${OUT}/${file}`
+async function build({ file, name, src: srcOverride, out: outOverride }) {
+  const src = srcOverride ?? `${SRC}/${file}`
+  const out = outOverride ?? `${OUT}/${file}`
   const base = await sharp(src).resize(W, H, { fit: "cover" }).png().toBuffer()
 
   // One continuous photo, split down the middle. Filters mirror the component:

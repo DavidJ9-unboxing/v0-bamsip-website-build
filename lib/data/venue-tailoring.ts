@@ -169,9 +169,26 @@ export const TAILORED: Record<number, VenueTailoring> = {
   }, // Port Street Beer House
 };
 
-// ── Defaults for every non-tailored venue ────────────────────────────────────
-export const DEFAULT_HERO = "/images/hero-night.png";
-export const DEFAULT_HERO_ALT = "A warm, candle-lit Manchester cocktail bar at night.";
+// ── Defaults for every venue WITHOUT its own baked hero ───────────────────────
+// The shared, generic "new design" hero (built by scripts/build-venue-heroes.mjs
+// from hero-night.png). Every venue that doesn't have its own venue-specific
+// PNG falls back to this so all outreach emails share the new design.
+export const DEFAULT_HERO = "/images/email-venue-launch-hero.png";
+export const DEFAULT_HERO_ALT =
+  "BamSip — a quiet Tuesday transformed into a full room, with 100 first rounds on us.";
+
+// Venue-specific hero PNGs that ACTUALLY exist in /public/images/venues.
+// TAILORED lists more heroImage paths than we have photos for; using one whose
+// file is missing would render a broken image in email, so we only honour a
+// venue-specific hero when its file is in this set — otherwise DEFAULT_HERO.
+// Keep this in sync with the VENUES list in scripts/build-venue-heroes.mjs.
+const AVAILABLE_VENUE_HEROES = new Set<string>([
+  "/images/venues/joshua-brooks.png",
+  "/images/venues/crazy-pedros.png",
+  "/images/venues/new-york-new-york.png",
+  "/images/venues/twenty-twenty-two.png",
+  "/images/venues/society-manchester.png",
+]);
 
 // ── {{hook}} source of truth ──────────────────────────────────────────────────
 // The unique opener line for every priority (Tier A) venue, keyed by venue id.
@@ -274,10 +291,13 @@ export const HOOKS: Record<number, string> = {
 export function resolveTailoring(id: number) {
   const t = TAILORED[id];
   const hook = HOOKS[id] ?? "";
+  // Only use a venue-specific hero when its PNG actually exists; otherwise fall
+  // back to the shared new-design hero so no email shows a broken image.
+  const hasOwnHero = t?.heroImage && AVAILABLE_VENUE_HEROES.has(t.heroImage);
   return {
     hook,
-    heroImage: t?.heroImage ?? DEFAULT_HERO,
-    heroAlt: t?.heroAlt ?? DEFAULT_HERO_ALT,
+    heroImage: hasOwnHero ? t!.heroImage : DEFAULT_HERO,
+    heroAlt: hasOwnHero ? t!.heroAlt : DEFAULT_HERO_ALT,
     subject: t?.subject, // undefined => use the active A/B subject variant
     isTailored: Boolean(hook) || Boolean(t),
   };

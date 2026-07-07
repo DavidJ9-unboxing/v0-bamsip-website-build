@@ -115,7 +115,7 @@ function renderForVenue(args: {
       ? hero(o.heroUrl.trim())
       : t?.isTailored
         ? hero(t.heroImage)
-        : content.heroUrl
+        : hero(content.heroUrl ?? "")
     content = {
       ...content,
       heroUrl,

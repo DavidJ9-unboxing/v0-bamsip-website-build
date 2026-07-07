@@ -61,16 +61,16 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 /**
  * Origin used to make hero image paths absolute for email clients.
  *
- * Emails must reference images from wherever THIS build is actually running,
- * otherwise a test/preview send would load stale assets from production. We
- * therefore prefer the current deployment's own URL (v0 preview → branch
- * deployment → production) and only fall back to the marketing domain.
+ * Real (and test) emails must reference images from a stable, publicly
+ * reachable host. The production marketing domain is the durable default —
+ * once this branch is merged, it serves the regenerated hero PNGs. For
+ * ad-hoc preview testing against a specific (public) deployment, set
+ * EMAIL_ASSET_ORIGIN to that deployment's origin, e.g.
+ * `https://my-branch.vercel.app`.
  */
 function resolveSiteOrigin() {
-  if (process.env.V0_RUNTIME_URL) return process.env.V0_RUNTIME_URL
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
-  if (process.env.VERCEL_PROJECT_PRODUCTION_URL)
-    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  const override = process.env.EMAIL_ASSET_ORIGIN?.trim()
+  if (override) return override.replace(/\/+$/, "")
   return "https://www.bamsip.com"
 }
 

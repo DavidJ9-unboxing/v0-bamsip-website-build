@@ -58,7 +58,23 @@ export type EmailableVenue = {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-const SITE_ORIGIN = "https://www.bamsip.com"
+/**
+ * Origin used to make hero image paths absolute for email clients.
+ *
+ * Emails must reference images from wherever THIS build is actually running,
+ * otherwise a test/preview send would load stale assets from production. We
+ * therefore prefer the current deployment's own URL (v0 preview → branch
+ * deployment → production) and only fall back to the marketing domain.
+ */
+function resolveSiteOrigin() {
+  if (process.env.V0_RUNTIME_URL) return process.env.V0_RUNTIME_URL
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL)
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  return "https://www.bamsip.com"
+}
+
+const SITE_ORIGIN = resolveSiteOrigin()
 
 /** Turns a /public-relative hero path into an absolute URL for email clients. */
 function absoluteHero(path: string) {

@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db"
 import { venueDirectory, venueSignups } from "@/lib/db/schema"
-import { eq, desc } from "drizzle-orm"
+import { eq, desc, sql } from "drizzle-orm"
 import { getAdminSession } from "@/lib/admin"
 import { sendEmail } from "@/lib/messaging"
 import {
@@ -10,11 +10,27 @@ import {
   buildVenueEmailHtml,
   type VenueEmailContent,
 } from "@/lib/email-templates"
+import { resolveTailoring } from "@/lib/data/venue-tailoring"
 
 async function assertAdmin() {
   const session = await getAdminSession()
   if (!session) throw new Error("Unauthorized")
   return session.user
+}
+
+/** Resolved per-venue tailoring surfaced to the composer UI. */
+export type VenueTailoringInfo = {
+  hook: string
+  heroImage: string
+  heroAlt: string
+  subject?: string
+}
+
+/** Admin-authored override for a single venue. Supersedes the master template. */
+export type VenueOverride = {
+  subject?: string
+  body?: string
+  heroUrl?: string
 }
 
 export type EmailableVenue = {
@@ -26,15 +42,87 @@ export type EmailableVenue = {
   email: string
   status: string
   category: string | null
+  // Pre-computed display order (1 = highest). Signups sort to the top.
+  priority: number
+  // Priority tier: "A" | "B" | "C" (null = lower/untiered).
+  tier: string | null
+  confidence: string | null
+  // false = no valid email; Send/Resend is disabled and it's excluded from bulk.
+  emailable: boolean
+  // Outreach tracking, persisted on the directory row.
+  timesSent: number
+  lastSentAt: string | null
+  // Curated per-venue tailoring (hook + custom hero), null when not tailored.
+  tailoring: VenueTailoringInfo | null
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+const SITE_ORIGIN = "https://www.bamsip.com"
+
+/** Turns a /public-relative hero path into an absolute URL for email clients. */
+function absoluteHero(path: string) {
+  if (!path) return path
+  if (/^https?:\/\//i.test(path)) return path
+  return `${SITE_ORIGIN}${path.startsWith("/") ? "" : "/"}${path}`
+}
+
 /**
- * Returns every venue we can email — researched directory prospects plus
- * venues that submitted the signup form. Rows without a valid email are
- * dropped, and duplicates (same email) are collapsed to a single recipient
- * (preferring the record with the richer contact name) so nobody is double-sent.
+ * Builds the final subject + HTML for one recipient. Precedence:
+ *   subject: override → tailored subject → master subject
+ *   hero:    override → tailored hero → master hero
+ *   body:    override → master body (with {{hook}} woven in)
+ * The {{hook}} token resolves to this venue's curated hook, or collapses away.
+ */
+function renderForVenue(args: {
+  masterSubject: string
+  masterContent: VenueEmailContent
+  vars: { venueName: string; contactName: string }
+  source: "directory" | "signup"
+  id: number
+  override?: VenueOverride
+  // Sent emails need absolute hero URLs; the in-app preview wants relative ones
+  // so images load from the running app instead of the (not-yet-deployed) site.
+  absolute?: boolean
+}) {
+  const t = args.source === "directory" ? resolveTailoring(args.id) : undefined
+  const o = args.override
+  const hero = args.absolute === false ? (p: string) => p : absoluteHero
+
+  let subject = args.masterSubject
+  if (t?.subject) subject = t.subject
+  if (o?.subject?.trim()) subject = o.subject
+
+  let content = args.masterContent
+  if (content.mode === "template") {
+    const heroUrl = o?.heroUrl?.trim()
+      ? hero(o.heroUrl.trim())
+      : t?.isTailored
+        ? hero(t.heroImage)
+        : content.heroUrl
+    content = {
+      ...content,
+      heroUrl,
+      body: o?.body?.trim() ? o.body : content.body,
+    }
+  }
+
+  const vars = { ...args.vars, hook: t?.hook ?? "" }
+  return {
+    subject: applyVenueTokens(subject, vars),
+    html: applyVenueTokens(buildVenueEmailHtml(content), vars),
+  }
+}
+
+/**
+ * Returns every venue in the directory plus venues that submitted the signup
+ * form. Rows flagged `emailable: false` (no valid email) are kept but marked so
+ * the UI can disable sending and exclude them from bulk. Emailable duplicates
+ * (same email) are collapsed to a single recipient (preferring the record with
+ * the richer contact name) so nobody is double-sent.
+ *
+ * Ordering is by the pre-computed `priority` field (1 = highest); signups sort
+ * to the very top. We never re-derive the order.
  */
 export async function getEmailableVenues(): Promise<EmailableVenue[]> {
   await assertAdmin()
@@ -48,9 +136,15 @@ export async function getEmailableVenues(): Promise<EmailableVenue[]> {
         email: venueDirectory.email,
         status: venueDirectory.status,
         category: venueDirectory.category,
+        priority: venueDirectory.priority,
+        tier: venueDirectory.tier,
+        confidence: venueDirectory.confidence,
+        emailable: venueDirectory.emailable,
+        timesSent: venueDirectory.timesSent,
+        lastSentAt: venueDirectory.lastSentAt,
       })
       .from(venueDirectory)
-      .orderBy(desc(venueDirectory.updatedAt)),
+      .orderBy(venueDirectory.priority),
     db
       .select({
         id: venueSignups.id,
@@ -64,47 +158,73 @@ export async function getEmailableVenues(): Promise<EmailableVenue[]> {
       .orderBy(desc(venueSignups.createdAt)),
   ])
 
+  // Emailable recipients are de-duplicated by email; non-emailable rows are
+  // always kept individually (they have no/invalid email to dedupe on).
   const byEmail = new Map<string, EmailableVenue>()
+  const nonEmailable: EmailableVenue[] = []
 
   const add = (v: EmailableVenue) => {
+    if (!v.emailable) {
+      nonEmailable.push(v)
+      return
+    }
     const email = v.email.trim().toLowerCase()
-    if (!EMAIL_RE.test(email)) return
     const existing = byEmail.get(email)
     if (!existing) {
       byEmail.set(email, v)
       return
     }
-    // Keep whichever has a real contact name; otherwise keep the first seen.
+    // Keep whichever has a real contact name; otherwise keep the higher priority.
     if (!existing.contactName && v.contactName) byEmail.set(email, v)
   }
 
   for (const r of dir) {
+    const email = (r.email ?? "").trim()
+    const t = resolveTailoring(r.id)
     add({
       key: `directory:${r.id}`,
       source: "directory",
       id: r.id,
       venueName: r.name,
       contactName: r.owner ?? "",
-      email: r.email ?? "",
+      email,
       status: r.status,
       category: r.category,
+      priority: r.priority ?? Number.MAX_SAFE_INTEGER,
+      tier: r.tier,
+      confidence: r.confidence,
+      emailable: r.emailable && EMAIL_RE.test(email),
+      timesSent: r.timesSent ?? 0,
+      lastSentAt: r.lastSentAt ? r.lastSentAt.toISOString() : null,
+      tailoring: t.isTailored
+        ? { hook: t.hook, heroImage: t.heroImage, heroAlt: t.heroAlt, subject: t.subject }
+        : null,
     })
   }
   for (const r of signs) {
+    const email = (r.email ?? "").trim()
     add({
       key: `signup:${r.id}`,
       source: "signup",
       id: r.id,
       venueName: r.venueName,
       contactName: r.contactName,
-      email: r.email,
+      email,
       status: r.status,
       category: r.venueType ?? null,
+      // Signups are our warmest leads — float them above the directory.
+      priority: -1,
+      tier: null,
+      confidence: null,
+      emailable: EMAIL_RE.test(email),
+      timesSent: 0,
+      lastSentAt: null,
+      tailoring: null,
     })
   }
 
-  return [...byEmail.values()].sort((a, b) =>
-    a.venueName.localeCompare(b.venueName),
+  return [...byEmail.values(), ...nonEmailable].sort(
+    (a, b) => a.priority - b.priority || a.venueName.localeCompare(b.venueName),
   )
 }
 
@@ -112,7 +232,8 @@ export async function getEmailableVenues(): Promise<EmailableVenue[]> {
 async function resolveRecipients(keys: string[]) {
   const all = await getEmailableVenues()
   const want = new Set(keys)
-  return all.filter((v) => want.has(v.key))
+  // Never send to a non-emailable row even if its key is passed in.
+  return all.filter((v) => want.has(v.key) && v.emailable)
 }
 
 /**
@@ -123,16 +244,23 @@ export async function renderVenuePreview(input: {
   subject: string
   content: VenueEmailContent
   sample: { venueName: string; contactName: string }
+  venue?: { source: "directory" | "signup"; id: number }
+  override?: VenueOverride
 }) {
   await assertAdmin()
-  const vars = {
-    venueName: input.sample.venueName || "The Northern Tap",
-    contactName: input.sample.contactName || "Alex",
-  }
-  return {
-    subject: applyVenueTokens(input.subject, vars),
-    html: applyVenueTokens(buildVenueEmailHtml(input.content), vars),
-  }
+  return renderForVenue({
+    masterSubject: input.subject,
+    masterContent: input.content,
+    vars: {
+      venueName: input.sample.venueName || "The Northern Tap",
+      contactName: input.sample.contactName || "Alex",
+    },
+    source: input.venue?.source ?? "signup",
+    id: input.venue?.id ?? -1,
+    override: input.override,
+    // Keep hero paths relative so the in-app preview loads them locally.
+    absolute: false,
+  })
 }
 
 /**
@@ -143,16 +271,29 @@ export async function sendVenueTest(input: {
   testEmail: string
   subject: string
   content: VenueEmailContent
+  sample?: { venueName: string; contactName: string }
+  venue?: { source: "directory" | "signup"; id: number }
+  override?: VenueOverride
 }) {
   await assertAdmin()
   const to = input.testEmail.trim()
   if (!EMAIL_RE.test(to)) return { ok: false as const, error: "Enter a valid test email." }
 
-  const vars = { venueName: "The Northern Tap", contactName: "Alex" }
+  const rendered = renderForVenue({
+    masterSubject: input.subject,
+    masterContent: input.content,
+    vars: {
+      venueName: input.sample?.venueName || "The Northern Tap",
+      contactName: input.sample?.contactName || "Alex",
+    },
+    source: input.venue?.source ?? "signup",
+    id: input.venue?.id ?? -1,
+    override: input.override,
+  })
   const res = await sendEmail({
     to,
-    subject: `[TEST] ${applyVenueTokens(input.subject, vars)}`,
-    html: applyVenueTokens(buildVenueEmailHtml(input.content), vars),
+    subject: `[TEST] ${rendered.subject}`,
+    html: rendered.html,
     recipientType: "admin",
     template: "venue-campaign-test",
   })
@@ -174,6 +315,8 @@ export async function sendVenueCampaign(input: {
   recipientKeys: string[]
   subject: string
   content: VenueEmailContent
+  // Per-venue overrides keyed by EmailableVenue.key (e.g. "directory:49").
+  overrides?: Record<string, VenueOverride>
 }) {
   await assertAdmin()
 
@@ -181,8 +324,10 @@ export async function sendVenueCampaign(input: {
   const recipients = await resolveRecipients(input.recipientKeys)
   if (!recipients.length) return { ok: false as const, error: "No valid recipients selected." }
 
-  const baseHtml = buildVenueEmailHtml(input.content)
-  const directoryProspectIds: number[] = []
+  // Directory rows that were successfully emailed — bump their send tracking.
+  const sentDirectoryIds: number[] = []
+  // Of those, the ones still 'prospect' get advanced to 'pending'.
+  const prospectIds = new Set<number>()
 
   let sent = 0
   let failed = 0
@@ -190,11 +335,18 @@ export async function sendVenueCampaign(input: {
   const errors: string[] = []
 
   for (const r of recipients) {
-    const vars = { venueName: r.venueName, contactName: r.contactName }
+    const rendered = renderForVenue({
+      masterSubject: input.subject,
+      masterContent: input.content,
+      vars: { venueName: r.venueName, contactName: r.contactName },
+      source: r.source,
+      id: r.id,
+      override: input.overrides?.[r.key],
+    })
     const res = await sendEmail({
       to: r.email,
-      subject: applyVenueTokens(input.subject, vars),
-      html: applyVenueTokens(baseHtml, vars),
+      subject: rendered.subject,
+      html: rendered.html,
       recipientType: "venue",
       recipientId: r.id,
       template: "venue-campaign",
@@ -202,8 +354,9 @@ export async function sendVenueCampaign(input: {
 
     if (res.ok) {
       sent++
-      if (r.source === "directory" && r.status === "prospect") {
-        directoryProspectIds.push(r.id)
+      if (r.source === "directory") {
+        sentDirectoryIds.push(r.id)
+        if (r.status === "prospect") prospectIds.add(r.id)
       }
     } else if ("skipped" in res && res.skipped) {
       skipped++
@@ -213,13 +366,19 @@ export async function sendVenueCampaign(input: {
     }
   }
 
-  // Advance freshly-contacted directory prospects to 'pending'.
-  if (directoryProspectIds.length) {
+  // Persist send tracking (timesSent + lastSentAt) and advance fresh prospects.
+  if (sentDirectoryIds.length) {
+    const now = new Date()
     await Promise.all(
-      directoryProspectIds.map((id) =>
+      sentDirectoryIds.map((id) =>
         db
           .update(venueDirectory)
-          .set({ status: "pending", updatedAt: new Date() })
+          .set({
+            timesSent: sql`${venueDirectory.timesSent} + 1`,
+            lastSentAt: now,
+            status: prospectIds.has(id) ? "pending" : undefined,
+            updatedAt: now,
+          })
           .where(eq(venueDirectory.id, id)),
       ),
     )

@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, useTransition } from "react"
+import { useEffect, useMemo, useState, useTransition } from "react"
 import {
   updateDirectoryVenue,
   deleteDirectoryVenue,
@@ -31,6 +31,8 @@ import {
   User,
   ExternalLink,
   Download,
+  Check,
+  Ban,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
@@ -58,6 +60,11 @@ type Directory = {
   signupId: number | null
   notes: string | null
   createdAt: Date | null
+  priority: number | null
+  tier: string | null
+  emailable: boolean
+  timesSent: number
+  lastSentAt: Date | null
 }
 
 type Stats = {
@@ -85,6 +92,10 @@ export function DirectoryTable({
   const [status, setStatus] = useState<string>("all")
   const [category, setCategory] = useState<string>("all")
   const [selected, setSelected] = useState<Directory | null>(null)
+  // Relative timestamps depend on the browser's clock/locale, so only render
+  // them after mount to avoid an SSR/client hydration mismatch.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim()
@@ -189,6 +200,7 @@ export function DirectoryTable({
                 <th className="px-4 py-3 font-medium">Category</th>
                 <th className="px-4 py-3 font-medium">Contact</th>
                 <th className="px-4 py-3 font-medium">Social</th>
+                <th className="px-4 py-3 font-medium">Sent</th>
                 <th className="px-4 py-3 font-medium">Status</th>
               </tr>
             </thead>
@@ -200,9 +212,20 @@ export function DirectoryTable({
                   className="cursor-pointer bg-ink transition-colors hover:bg-ink2"
                 >
                   <td className="px-4 py-3">
-                    <div className="font-medium text-cream">{r.name}</div>
+                    <div className="flex items-center gap-2">
+                      <TierDot tier={r.tier} />
+                      <span className="font-medium text-cream">{r.name}</span>
+                      {!r.emailable && (
+                        <span
+                          className="inline-flex items-center gap-1 text-[10px] text-amber-soft/80"
+                          title="No valid email"
+                        >
+                          <Ban className="h-3 w-3" /> no email
+                        </span>
+                      )}
+                    </div>
                     {r.address && (
-                      <div className="line-clamp-1 max-w-[260px] text-xs text-mute">
+                      <div className="line-clamp-1 max-w-[260px] pl-4 text-xs text-mute">
                         {r.address}
                       </div>
                     )}
@@ -234,13 +257,30 @@ export function DirectoryTable({
                     </div>
                   </td>
                   <td className="px-4 py-3">
+                    {r.timesSent > 0 ? (
+                      <div className="flex flex-col gap-0.5">
+                        <span className="inline-flex w-fit items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-medium text-success">
+                          <Check className="h-3 w-3" />
+                          Sent{r.timesSent > 1 ? ` ${r.timesSent}×` : ""}
+                        </span>
+                        {mounted && r.lastSentAt && (
+                          <span className="pl-1 text-[10px] text-mute">
+                            {formatSent(r.lastSentAt)}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-mute">—</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
                     <StatusBadge status={r.status} />
                   </td>
                 </tr>
               ))}
               {!filtered.length && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-10 text-center text-mute">
+                  <td colSpan={6} className="px-4 py-10 text-center text-mute">
                     No venues match your filters.
                   </td>
                 </tr>
@@ -620,4 +660,35 @@ function EditField({
       </div>
     </div>
   )
+}
+
+// Priority tier → dot colour. A = green, B = yellow, everything else (C/D and
+// lower) = red. Untiered venues show no dot.
+function tierColor(tier: string | null) {
+  if (tier === "A") return "bg-success"
+  if (tier === "B") return "bg-amber"
+  return "bg-red-500"
+}
+
+function TierDot({ tier }: { tier: string | null }) {
+  if (!tier) return <span className="h-2 w-2 shrink-0 rounded-full bg-transparent" />
+  return (
+    <span
+      className={`h-2 w-2 shrink-0 rounded-full ${tierColor(tier)}`}
+      title={`Tier ${tier}`}
+      aria-label={`Tier ${tier}`}
+    />
+  )
+}
+
+function formatSent(date: Date) {
+  const d = date instanceof Date ? date : new Date(date)
+  if (Number.isNaN(d.getTime())) return ""
+  const diffMs = Date.now() - d.getTime()
+  const day = 86_400_000
+  if (diffMs < day && d.getDate() === new Date().getDate()) {
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  }
+  if (diffMs < 7 * day) return d.toLocaleDateString([], { weekday: "short" })
+  return d.toLocaleDateString([], { day: "numeric", month: "short" })
 }

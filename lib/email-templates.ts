@@ -49,23 +49,40 @@ export function venueConfirmEmail(
  * to: https://www.bamsip.com/images/email-venue-launch-hero.jpg
  */
 export const VENUE_LAUNCH_HERO =
-  "https://www.bamsip.com/images/hero-night.png?dpl=dpl_3BpxQPPnik5swLTGYpvdqfTzYckG"
+  "https://www.bamsip.com/images/hero-night.png"
 
 /** Personalisation tokens supported in venue email subjects and bodies. */
 export type VenueEmailVars = {
   venueName: string
   contactName: string
+  /** Per-venue humorous opener. When empty, its line is removed entirely. */
+  hook?: string
 }
 
 /**
- * Replaces {{venueName}}, {{contactName}} and {{firstName}} tokens. Substituted
- * values are HTML-escaped so a venue/contact name can never break the markup.
+ * Replaces {{venueName}}, {{contactName}}, {{firstName}} and {{hook}} tokens.
+ * Substituted values are HTML-escaped so a venue/contact name can never break
+ * the markup. The {{hook}} token is special: when no hook is provided, the whole
+ * paragraph (or line) holding it is removed so there's never an empty gap.
  */
 export function applyVenueTokens(input: string, vars: VenueEmailVars) {
   const venue = escapeHtml(vars.venueName || "your venue")
   const contact = escapeHtml(vars.contactName || "there")
   const first = escapeHtml((vars.contactName || "there").split(/\s+/)[0])
-  return input
+  const hook = vars.hook ? escapeHtml(vars.hook) : ""
+
+  let out = input
+  if (hook) {
+    out = out.replace(/\{\{\s*hook\s*\}\}/gi, hook)
+  } else {
+    // Drop a paragraph that holds only the hook token (HTML), then strip any
+    // bare token left over (e.g. in plain-text bodies/subjects).
+    out = out
+      .replace(/<p[^>]*>\s*\{\{\s*hook\s*\}\}\s*<\/p>\s*/gi, "")
+      .replace(/\{\{\s*hook\s*\}\}/gi, "")
+  }
+
+  return out
     .replace(/\{\{\s*venueName\s*\}\}/gi, venue)
     .replace(/\{\{\s*contactName\s*\}\}/gi, contact)
     .replace(/\{\{\s*firstName\s*\}\}/gi, first)
@@ -123,23 +140,43 @@ export function buildVenueEmailHtml(content: VenueEmailContent) {
     ${SHELL_CLOSE}`
 }
 
+/**
+ * Subject lines we're A/B testing for the venue launch campaign. Each supports
+ * the {{venueName}} token. The first is the default. Keep these in one place so
+ * the composer can offer them as one-click presets.
+ */
+export const VENUE_LAUNCH_SUBJECTS = [
+  "{{venueName}}, the first round's on us",
+  "buying the first 100 drinks at {{venueName}}?",
+  "we'll fill your quietest night at {{venueName}}",
+] as const
+
 /** Sensible default subject for the venue launch campaign (with token). */
-export const VENUE_LAUNCH_SUBJECT =
-  "{{venueName}} x BamSip: smarter nights out start here"
+export const VENUE_LAUNCH_SUBJECT = VENUE_LAUNCH_SUBJECTS[0]
 
 /** Default branded template content for the venue launch campaign. */
 export function defaultVenueLaunchContent(ctaUrl: string): VenueEmailContent {
   return {
     mode: "template",
     heroUrl: VENUE_LAUNCH_HERO,
-    headline: "smarter nights out start here",
-    body: `Hi {{contactName}},
+    headline: "fancy 100 first-time guests, first round on us?",
+    body: `Hi {{venueName}},
 
-We're bringing BamSip to Manchester this July and we'd love to put {{venueName}} in front of our crowd. BamSip fills your quieter nights by sending engaged locals your way — no upfront cost, no commitment.
+{{hook}}
 
-Want to hear how it works for venues like yours?`,
-    ctaLabel: "Get the venue details",
-    ctaUrl,
+Quick one. We're BamSip, Manchester's new nightlife app built to fill your quiet nights: you set a deal, we send the crowd, and the data shows what worked.
+
+We're launching this summer and picking four venues for a launch night. We bring the crowd and buy the first round for the first 100 through your door, then they drink on at an app discount for two hours, all paid straight to your till on Stripe like any normal tap payment.
+
+BamSip is always free to you: no subscription, no lock-in. The only thing you spend is the discount you put into an offer, as often as you like.
+
+Four slots. Fancy one? Reply "interested" and I'll send dates, or register {{venueName}} below before the city goes live.
+
+Cheers,
+[name]
+BamSip · smarter nights out`,
+    ctaLabel: "register your interest",
+    ctaUrl: "https://www.bamsip.com/venues#interest",
   }
 }
 

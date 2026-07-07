@@ -1,16 +1,18 @@
 "use client"
 
-import { useMemo, useState, useTransition } from "react"
+import { useEffect, useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import {
   sendVenueCampaign,
   sendVenueTest,
   renderVenuePreview,
   type EmailableVenue,
+  type VenueOverride,
 } from "@/app/actions/venue-email"
 import {
   VENUE_LAUNCH_HERO,
   VENUE_LAUNCH_SUBJECT,
+  VENUE_LAUNCH_SUBJECTS,
   defaultVenueLaunchContent,
   type VenueEmailContent,
 } from "@/lib/email-templates"
@@ -46,6 +48,11 @@ import {
   CheckCircle2,
   Store,
   BookMarked,
+  Clock,
+  Ban,
+  Check,
+  Sparkles,
+  Pencil,
 } from "lucide-react"
 
 type Mode = "template" | "html"
@@ -63,12 +70,31 @@ export function VenueEmailComposer({
 }) {
   const router = useRouter()
   const [isSending, startSending] = useTransition()
+  // Relative timestamps depend on the browser's clock/locale, so only render
+  // them after mount to avoid an SSR/client hydration mismatch.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
   // ---- recipients ----
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [search, setSearch] = useState("")
   const [sourceFilter, setSourceFilter] = useState<"all" | "directory" | "signup">("all")
   const [statusFilter, setStatusFilter] = useState<string>("all")
+
+  // Optimistic send-tracking overlay so per-row "Sent" pills update instantly
+  // after a send, before the server refresh lands.
+  const [sentOverlay, setSentOverlay] = useState<
+    Record<string, { timesSent: number; lastSentAt: string | null }>
+  >({})
+
+  const venuesView = useMemo(
+    () =>
+      venues.map((v) => {
+        const o = sentOverlay[v.key]
+        return o ? { ...v, timesSent: o.timesSent, lastSentAt: o.lastSentAt } : v
+      }),
+    [venues, sentOverlay],
+  )
 
   const statuses = useMemo(
     () => Array.from(new Set(venues.map((v) => v.status))).sort(),
@@ -77,9 +103,14 @@ export function VenueEmailComposer({
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
-    return venues.filter((v) => {
+    return venuesView.filter((v) => {
+      // Venues without a valid email are hidden here (they stay in the directory).
+      if (!v.emailable) return false
       if (sourceFilter !== "all" && v.source !== sourceFilter) return false
-      if (statusFilter !== "all" && v.status !== statusFilter) return false
+      if (statusFilter === "sent" && v.timesSent === 0) return false
+      else if (statusFilter === "not-sent" && v.timesSent > 0) return false
+      else if (statusFilter !== "all" && statusFilter !== "sent" && statusFilter !== "not-sent" && v.status !== statusFilter)
+        return false
       if (!q) return true
       return (
         v.venueName.toLowerCase().includes(q) ||
@@ -87,10 +118,17 @@ export function VenueEmailComposer({
         v.contactName.toLowerCase().includes(q)
       )
     })
-  }, [venues, search, sourceFilter, statusFilter])
+  }, [venuesView, search, sourceFilter, statusFilter])
+
+  // Only emailable rows can be (de)selected — non-emailable are excluded from bulk.
+  const selectableFiltered = useMemo(
+    () => filtered.filter((v) => v.emailable),
+    [filtered],
+  )
 
   const allFilteredSelected =
-    filtered.length > 0 && filtered.every((v) => selected.has(v.key))
+    selectableFiltered.length > 0 &&
+    selectableFiltered.every((v) => selected.has(v.key))
 
   const toggle = (key: string) =>
     setSelected((prev) => {
@@ -102,15 +140,25 @@ export function VenueEmailComposer({
   const toggleAllFiltered = () =>
     setSelected((prev) => {
       const next = new Set(prev)
-      if (allFilteredSelected) filtered.forEach((v) => next.delete(v.key))
-      else filtered.forEach((v) => next.add(v.key))
+      if (allFilteredSelected) selectableFiltered.forEach((v) => next.delete(v.key))
+      else selectableFiltered.forEach((v) => next.add(v.key))
       return next
     })
+
+  // record an optimistic successful send for one venue
+  const markSent = (v: EmailableVenue) =>
+    setSentOverlay((prev) => ({
+      ...prev,
+      [v.key]: {
+        timesSent: (prev[v.key]?.timesSent ?? v.timesSent) + 1,
+        lastSentAt: new Date().toISOString(),
+      },
+    }))
 
   // ---- compose ----
   const defaultContent = defaultVenueLaunchContent(defaultCtaUrl)
   const [mode, setMode] = useState<Mode>("template")
-  const [subject, setSubject] = useState(VENUE_LAUNCH_SUBJECT)
+  const [subject, setSubject] = useState<string>(VENUE_LAUNCH_SUBJECT)
   const initial = defaultContent.mode === "template" ? defaultContent : null
   const [heroUrl, setHeroUrl] = useState(initial?.heroUrl ?? VENUE_LAUNCH_HERO)
   const [headline, setHeadline] = useState(initial?.headline ?? "")
@@ -124,13 +172,72 @@ export function VenueEmailComposer({
       ? { mode: "html", rawHtml }
       : { mode: "template", heroUrl, headline, body, ctaLabel, ctaUrl }
 
+  // ---- per-venue overrides (keyed by venue.key) ----
+  // An override fully supersedes the master template for that one venue.
+  const [overrides, setOverrides] = useState<Record<string, VenueOverride>>({})
+
+  const setOverride = (key: string, patch: Partial<VenueOverride> | null) =>
+    setOverrides((prev) => {
+      if (patch === null) {
+        const next = { ...prev }
+        delete next[key]
+        return next
+      }
+      return { ...prev, [key]: { ...prev[key], ...patch } }
+    })
+
   // ---- preview ----
   const [previewOpen, setPreviewOpen] = useState(false)
   const [preview, setPreview] = useState<{ subject: string; html: string } | null>(null)
   const [previewing, startPreview] = useTransition()
+  // Which venue the live preview/test personalizes to. Defaults to the first
+  // selected recipient, but you can preview as any venue.
+  const [previewKey, setPreviewKey] = useState<string>("")
+
+  // Venue the preview personalizes to: the explicitly chosen one, else the
+  // first selected recipient, else the first venue in the list.
+  const previewVenue = useMemo(() => {
+    if (previewKey) {
+      const byKey = venues.find((v) => v.key === previewKey)
+      if (byKey) return byKey
+    }
+    return venues.find((v) => selected.has(v.key)) ?? venues[0]
+  }, [venues, selected, previewKey])
+
+  // Options for the "Preview as" picker: selected recipients first, then the
+  // rest of the list. Capped so the dropdown stays light with 500+ venues.
+  const previewOptions = useMemo(() => {
+    const chosen = venues.filter((v) => selected.has(v.key))
+    const rest = venues.filter((v) => !selected.has(v.key))
+    const merged = [...chosen, ...rest].slice(0, 200)
+    // Always keep the currently-previewed venue available as an option.
+    if (previewVenue && !merged.some((v) => v.key === previewVenue.key)) {
+      merged.unshift(previewVenue)
+    }
+    return merged
+  }, [venues, selected, previewVenue])
+
+  // Manual override for the venue currently being previewed (if any).
+  const currentOverride = previewVenue ? overrides[previewVenue.key] : undefined
+
+  // Seeds an editable override from what this venue would otherwise receive:
+  // the tailored subject/hero (or master), with its hook woven into the body.
+  const seedOverride = (v: EmailableVenue) => {
+    const t = v.tailoring
+    setOverride(v.key, {
+      subject: t?.subject ?? subject,
+      body:
+        mode === "template"
+          ? body
+              .replace(/\{\{\s*hook\s*\}\}/gi, t?.hook ?? "")
+              .replace(/\n{3,}/g, "\n\n")
+              .trim()
+          : "",
+      heroUrl: mode === "template" ? t?.heroImage ?? heroUrl : "",
+    })
+  }
 
   const openPreview = () => {
-    const sample = venues.find((v) => selected.has(v.key)) ?? venues[0]
     setPreviewOpen(true)
     setPreview(null)
     startPreview(async () => {
@@ -138,9 +245,13 @@ export function VenueEmailComposer({
         subject,
         content: buildContent(),
         sample: {
-          venueName: sample?.venueName ?? "",
-          contactName: sample?.contactName ?? "",
+          venueName: previewVenue?.venueName ?? "",
+          contactName: previewVenue?.contactName ?? "",
         },
+        venue: previewVenue
+          ? { source: previewVenue.source, id: previewVenue.id }
+          : undefined,
+        override: previewVenue ? overrides[previewVenue.key] : undefined,
       })
       setPreview(res)
     })
@@ -154,7 +265,19 @@ export function VenueEmailComposer({
   const sendTest = () => {
     setTestMsg(null)
     startTest(async () => {
-      const res = await sendVenueTest({ testEmail, subject, content: buildContent() })
+      const res = await sendVenueTest({
+        testEmail,
+        subject,
+        content: buildContent(),
+        sample: {
+          venueName: previewVenue?.venueName ?? "",
+          contactName: previewVenue?.contactName ?? "",
+        },
+        venue: previewVenue
+          ? { source: previewVenue.source, id: previewVenue.id }
+          : undefined,
+        override: previewVenue ? overrides[previewVenue.key] : undefined,
+      })
       setTestMsg(
         res.ok
           ? { ok: true, text: `Test sent to ${testEmail}.` }
@@ -173,17 +296,24 @@ export function VenueEmailComposer({
 
   const doSend = () => {
     setResult(null)
+    const keys = [...selected]
     startSending(async () => {
       const res = await sendVenueCampaign({
-        recipientKeys: [...selected],
+        recipientKeys: keys,
         subject,
         content: buildContent(),
+        overrides,
       })
       setConfirmOpen(false)
       if (!res.ok && "error" in res) {
         setResult(res.error ?? "Send failed.")
         return
       }
+      // Optimistically bump the pills for everyone we just emailed.
+      keys.forEach((k) => {
+        const v = venues.find((x) => x.key === k)
+        if (v) markSent(v)
+      })
       const parts = [`${res.sent} sent`]
       if (res.failed) parts.push(`${res.failed} failed`)
       if (res.skipped) parts.push(`${res.skipped} skipped`)
@@ -192,6 +322,7 @@ export function VenueEmailComposer({
       router.refresh()
     })
   }
+
 
   return (
     <div className="flex flex-col gap-6">
@@ -252,6 +383,8 @@ export function VenueEmailComposer({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Any status</SelectItem>
+                  <SelectItem value="sent">Sent</SelectItem>
+                  <SelectItem value="not-sent">Not sent</SelectItem>
                   {statuses.map((s) => (
                     <SelectItem key={s} value={s}>
                       {s}
@@ -263,14 +396,13 @@ export function VenueEmailComposer({
           </div>
 
           <div className="flex items-center justify-between border-y border-hairline py-2">
-            <button
-              type="button"
-              onClick={toggleAllFiltered}
-              className="flex items-center gap-2 text-sm text-cream2 hover:text-cream"
-            >
-              <Checkbox checked={allFilteredSelected} />
-              Select all ({filtered.length})
-            </button>
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-cream2 hover:text-cream">
+              <Checkbox
+                checked={allFilteredSelected}
+                onCheckedChange={toggleAllFiltered}
+              />
+              Select all ({selectableFiltered.length})
+            </label>
             {selected.size > 0 && (
               <button
                 type="button"
@@ -287,18 +419,41 @@ export function VenueEmailComposer({
               filtered.map((v) => {
                 const checked = selected.has(v.key)
                 return (
-                  <label
+                  <div
                     key={v.key}
-                    className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-colors ${
+                    role={v.emailable ? "button" : undefined}
+                    tabIndex={v.emailable ? 0 : undefined}
+                    onClick={() => v.emailable && toggle(v.key)}
+                    onKeyDown={(e) => {
+                      if (v.emailable && (e.key === "Enter" || e.key === " ")) {
+                        e.preventDefault()
+                        toggle(v.key)
+                      }
+                    }}
+                    className={`flex items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-colors ${
                       checked
                         ? "border-flame/40 bg-flame/10"
-                        : "border-hairline bg-ink hover:bg-ink3"
+                        : v.emailable
+                          ? "cursor-pointer border-hairline bg-ink hover:bg-ink3"
+                          : "border-hairline bg-ink/60"
                     }`}
                   >
-                    <Checkbox checked={checked} onCheckedChange={() => toggle(v.key)} />
+                    <Checkbox
+                      checked={checked}
+                      disabled={!v.emailable}
+                      onCheckedChange={() => v.emailable && toggle(v.key)}
+                      aria-label={`Select ${v.venueName}`}
+                      tabIndex={-1}
+                      className="pointer-events-none"
+                    />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="truncate font-medium text-cream">{v.venueName}</span>
+                        <TierDot tier={v.tier} />
+                        <span
+                          className={`truncate font-medium ${v.emailable ? "text-cream" : "text-mute"}`}
+                        >
+                          {v.venueName}
+                        </span>
                         <Badge
                           variant="outline"
                           className="shrink-0 gap-1 border-hairline text-[10px] text-mute"
@@ -310,10 +465,30 @@ export function VenueEmailComposer({
                           )}
                           {v.source}
                         </Badge>
+                        {v.timesSent > 0 && (
+                          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-medium text-success">
+                            <Check className="h-2.5 w-2.5" />
+                            Sent{v.timesSent > 1 ? ` ${v.timesSent}×` : ""}
+                          </span>
+                        )}
                       </div>
-                      <div className="truncate text-xs text-mute">{v.email}</div>
+                      <div className="mt-0.5 flex items-center gap-2 text-xs text-mute">
+                        {v.emailable ? (
+                          <span className="truncate">{v.email}</span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-amber-soft/80">
+                            <Ban className="h-3 w-3" /> no valid email
+                          </span>
+                        )}
+                        {mounted && v.lastSentAt && (
+                          <span className="inline-flex shrink-0 items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {formatSent(v.lastSentAt)}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </label>
+                  </div>
                 )
               })
             ) : (
@@ -338,6 +513,30 @@ export function VenueEmailComposer({
               onChange={(e) => setSubject(e.target.value)}
               placeholder="{{venueName}} x BamSip"
             />
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs text-mute">A/B test variants — click to use:</span>
+              <div className="flex flex-wrap gap-1.5">
+                {VENUE_LAUNCH_SUBJECTS.map((s, i) => {
+                  const active = subject === s
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setSubject(s)}
+                      className={`rounded-full border px-2.5 py-1 text-left text-xs transition-colors ${
+                        active
+                          ? "border-flame bg-flame/15 text-flame"
+                          : "border-hairline bg-ink text-cream2 hover:bg-ink3"
+                      }`}
+                      title={s}
+                    >
+                      <span className="font-medium">{String.fromCharCode(65 + i)}</span>
+                      <span className="ml-1.5 text-mute">{s}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
           </div>
 
           {/* mode toggle */}
@@ -453,16 +652,145 @@ export function VenueEmailComposer({
             </div>
           )}
 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={openPreview}
-            className="border-hairline"
-            disabled={!contentReady}
-          >
-            <Eye className="h-4 w-4" />
-            Preview
-          </Button>
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-cream2">Preview as</Label>
+            <div className="flex gap-2">
+              <Select
+                value={previewVenue?.key ?? ""}
+                onValueChange={setPreviewKey}
+              >
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Pick a venue to personalize for" />
+                </SelectTrigger>
+                <SelectContent>
+                  {previewOptions.map((v) => (
+                    <SelectItem key={v.key} value={v.key}>
+                      {v.venueName}
+                      {v.contactName ? ` — ${v.contactName}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={openPreview}
+                className="shrink-0 border-hairline"
+                disabled={!contentReady}
+              >
+                <Eye className="h-4 w-4" />
+                Preview
+              </Button>
+            </div>
+            <p className="text-xs text-mute">
+              Tokens fill in for this venue. Defaults to your first selected
+              recipient.
+            </p>
+          </div>
+
+          {/* selected venue tailoring */}
+          {previewVenue && (
+            <div className="rounded-xl border border-hairline bg-ink p-3">
+              <div className="flex items-center justify-between gap-2">
+                <Label className="text-cream2">This venue</Label>
+                {previewVenue.tailoring ? (
+                  <Badge className="gap-1 border-flame/40 bg-flame/15 text-flame">
+                    <Sparkles className="h-3 w-3" />
+                    Tailored
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="border-hairline text-mute">
+                    Generic template
+                  </Badge>
+                )}
+              </div>
+              <p className="mt-1 text-sm font-medium text-cream">
+                {previewVenue.venueName}
+              </p>
+
+              {previewVenue.tailoring && (
+                <div className="mt-2 flex flex-col gap-2">
+                  <p className="text-xs italic leading-relaxed text-cream2">
+                    {`"${previewVenue.tailoring.hook}"`}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={previewVenue.tailoring.heroImage || "/placeholder.svg"}
+                      alt={previewVenue.tailoring.heroAlt}
+                      className="h-12 w-20 shrink-0 rounded-md object-cover ring-1 ring-hairline"
+                    />
+                    <span className="break-all text-[11px] text-mute">
+                      {previewVenue.tailoring.heroImage}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              <p className="mt-2 text-xs text-mute">
+                Subject:{" "}
+                <span className="text-cream2">
+                  {currentOverride?.subject ??
+                    previewVenue.tailoring?.subject ??
+                    subject}
+                </span>
+              </p>
+
+              {currentOverride ? (
+                <div className="mt-3 flex flex-col gap-2 rounded-lg border border-flame/30 bg-flame/5 p-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-cream2">
+                      Custom for this venue
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setOverride(previewVenue.key, null)}
+                      className="text-xs text-flame hover:underline"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <Input
+                    value={currentOverride.subject ?? ""}
+                    onChange={(e) =>
+                      setOverride(previewVenue.key, { subject: e.target.value })
+                    }
+                    placeholder="Custom subject"
+                  />
+                  {mode === "template" && (
+                    <>
+                      <Textarea
+                        value={currentOverride.body ?? ""}
+                        onChange={(e) =>
+                          setOverride(previewVenue.key, { body: e.target.value })
+                        }
+                        rows={6}
+                        placeholder="Custom body"
+                        className="font-mono text-xs"
+                      />
+                      <Input
+                        value={currentOverride.heroUrl ?? ""}
+                        onChange={(e) =>
+                          setOverride(previewVenue.key, { heroUrl: e.target.value })
+                        }
+                        placeholder="Custom hero image URL"
+                      />
+                    </>
+                  )}
+                </div>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => seedOverride(previewVenue)}
+                  className="mt-3 h-8 border-hairline px-2.5 text-xs"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                  Customise for this venue
+                </Button>
+              )}
+            </div>
+          )}
 
           {/* test send */}
           <div className="rounded-xl border border-hairline bg-ink p-3">
@@ -563,4 +891,37 @@ export function VenueEmailComposer({
       </Dialog>
     </div>
   )
+}
+
+// Priority tier → dot colour. A = green, B = yellow, everything else (C/D and
+// lower) = red.
+function tierColor(tier: string | null) {
+  if (tier === "A") return "bg-success"
+  if (tier === "B") return "bg-amber"
+  return "bg-red-500"
+}
+
+function TierDot({ tier }: { tier: string | null }) {
+  const label = tier ? `Tier ${tier}` : "Lower priority"
+  return (
+    <span
+      className={`h-2 w-2 shrink-0 rounded-full ${tierColor(tier)}`}
+      title={label}
+      aria-label={label}
+    />
+  )
+}
+
+function formatSent(iso: string) {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ""
+  const diffMs = Date.now() - d.getTime()
+  const day = 86_400_000
+  if (diffMs < day && d.getDate() === new Date().getDate()) {
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  }
+  if (diffMs < 7 * day) {
+    return d.toLocaleDateString([], { weekday: "short" })
+  }
+  return d.toLocaleDateString([], { day: "numeric", month: "short" })
 }

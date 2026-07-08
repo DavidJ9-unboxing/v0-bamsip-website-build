@@ -76,11 +76,25 @@ function resolveSiteOrigin() {
 
 const SITE_ORIGIN = resolveSiteOrigin()
 
-/** Turns a /public-relative hero path into an absolute URL for email clients. */
+/**
+ * Cache-busting version for hero images. Email clients (Gmail, Outlook, etc.)
+ * aggressively cache images by URL, so a recipient who received an earlier send
+ * keeps seeing the OLD hero even after we regenerate the PNG at the same path.
+ * Bump this whenever the baked hero design changes to force every inbox — even
+ * previously-contacted ones like the founder's — to refetch the new image.
+ */
+const HERO_ASSET_VERSION = "2"
+
+/** Appends the asset version as a query param, preserving any existing query. */
+function withHeroVersion(url: string) {
+  return `${url}${url.includes("?") ? "&" : "?"}v=${HERO_ASSET_VERSION}`
+}
+
+/** Turns a /public-relative hero path into an absolute, cache-busted URL. */
 function absoluteHero(path: string) {
   if (!path) return path
-  if (/^https?:\/\//i.test(path)) return path
-  return `${SITE_ORIGIN}${path.startsWith("/") ? "" : "/"}${path}`
+  if (/^https?:\/\//i.test(path)) return withHeroVersion(path)
+  return withHeroVersion(`${SITE_ORIGIN}${path.startsWith("/") ? "" : "/"}${path}`)
 }
 
 /**

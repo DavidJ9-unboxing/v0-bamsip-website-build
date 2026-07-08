@@ -173,8 +173,8 @@ BamSip is always free to you: no subscription, no lock-in. The only thing you sp
 Four slots. Fancy one? Reply "interested" and I'll send dates, or register {{venueName}} below before the city goes live.
 
 Cheers,
-[name]
-BamSip · smarter nights out`,
+Natan Turner, Founder/CEO
+BamSip · smarter nights out.`,
     ctaLabel: "register your interest",
     ctaUrl: "https://www.bamsip.com/venues#interest",
   }

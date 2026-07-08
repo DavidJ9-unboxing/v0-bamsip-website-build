@@ -188,7 +188,7 @@ export function VenueHero({
           first rounds, on us
         </span>
         <span style={{ color: MUTED, fontWeight: 500, fontSize: "1.55cqw", marginTop: "0.4cqw" }}>
-          we bring the crowd — you set the offers
+          we bring the crowd, you set the offers
         </span>
       </div>
     </div>

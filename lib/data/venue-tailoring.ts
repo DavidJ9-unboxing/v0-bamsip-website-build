@@ -188,7 +188,68 @@ const AVAILABLE_VENUE_HEROES = new Set<string>([
   "/images/venues/new-york-new-york.png",
   "/images/venues/twenty-twenty-two.png",
   "/images/venues/society-manchester.png",
+  "/images/venues/bar-pop.png",
+  "/images/venues/crazy-pedros-nq.png",
+  "/images/venues/atlas-bar.png",
+  "/images/venues/flawd.png",
+  "/images/venues/seven-bro7hers-beerhouse-ancoats.png",
+  "/images/venues/blossom-street-social.png",
+  "/images/venues/northern-monk-refectory-mcr.png",
+  "/images/venues/lass-o-gowrie.png",
+  "/images/venues/mojo.png",
+  "/images/venues/nest.png",
+  "/images/venues/stage-and-radio.png",
+  "/images/venues/liquor-store.png",
+  "/images/venues/port-street.png",
+  "/images/venues/salisbury-ale-house.png",
+  "/images/venues/old-pint-pot.png",
+  "/images/venues/ramona.png",
+  "/images/venues/the-freemount.png",
+  "/images/venues/courtyard.png",
+  "/images/venues/impossible.png",
+  "/images/venues/alberts-schloss.png",
+  "/images/venues/freight-island.png",
 ]);
+
+// ── Hero-only overrides ───────────────────────────────────────────────────────
+// Venues that now have their own hero photo but are NOT in the TAILORED map
+// above (so they carry no bespoke hook). This attaches their real hero image
+// without fabricating marketing copy — resolveTailoring reads heroImage/heroAlt
+// from here when a TAILORED entry is absent. Keyed by venue id.
+const VENUE_HERO_OVERRIDES: Record<number, { heroImage: string; heroAlt: string }> = {
+  63: {
+    heroImage: "/images/venues/bar-pop.png",
+    heroAlt: "A two-level LGBTQ+ Canal Street bar lit warm at night, ready for a busy crowd.",
+  },
+  293: {
+    heroImage: "/images/venues/crazy-pedros-nq.png",
+    heroAlt: "A late-night Northern Quarter pizza-and-cocktail bar with neon and eclectic decor.",
+  },
+  283: {
+    heroImage: "/images/venues/seven-bro7hers-beerhouse-ancoats.png",
+    heroAlt: "An Ancoats craft beerhouse with a long bar of taps and warm industrial lighting.",
+  },
+  284: {
+    heroImage: "/images/venues/blossom-street-social.png",
+    heroAlt: "A relaxed Ancoats bar and social space with warm lighting and a full counter.",
+  },
+  306: {
+    heroImage: "/images/venues/northern-monk-refectory-mcr.png",
+    heroAlt: "A Northern Monk taproom with rows of craft-beer taps under warm lighting.",
+  },
+  95: {
+    heroImage: "/images/venues/salisbury-ale-house.png",
+    heroAlt: "A traditional Manchester ale house with a classic bar and cask pumps.",
+  },
+  247: {
+    heroImage: "/images/venues/old-pint-pot.png",
+    heroAlt: "A riverside Salford pub with a warm, welcoming bar and seating.",
+  },
+  290: {
+    heroImage: "/images/venues/the-freemount.png",
+    heroAlt: "A lively neighbourhood bar set for a busy night, warmly lit.",
+  },
+};
 
 // ── {{hook}} source of truth ──────────────────────────────────────────────────
 // The unique opener line for every priority (Tier A) venue, keyed by venue id.
@@ -291,13 +352,17 @@ export const HOOKS: Record<number, string> = {
 export function resolveTailoring(id: number) {
   const t = TAILORED[id];
   const hook = HOOKS[id] ?? "";
+  // Candidate hero: prefer the TAILORED entry, then a hero-only override.
+  const override = VENUE_HERO_OVERRIDES[id];
+  const candidateImage = t?.heroImage ?? override?.heroImage;
+  const candidateAlt = t?.heroAlt ?? override?.heroAlt;
   // Only use a venue-specific hero when its PNG actually exists; otherwise fall
   // back to the shared new-design hero so no email shows a broken image.
-  const hasOwnHero = t?.heroImage && AVAILABLE_VENUE_HEROES.has(t.heroImage);
+  const hasOwnHero = candidateImage && AVAILABLE_VENUE_HEROES.has(candidateImage);
   return {
     hook,
-    heroImage: hasOwnHero ? t!.heroImage : DEFAULT_HERO,
-    heroAlt: hasOwnHero ? t!.heroAlt : DEFAULT_HERO_ALT,
+    heroImage: hasOwnHero ? candidateImage! : DEFAULT_HERO,
+    heroAlt: hasOwnHero ? candidateAlt! : DEFAULT_HERO_ALT,
     subject: t?.subject, // undefined => use the active A/B subject variant
     isTailored: Boolean(hook) || Boolean(t),
   };

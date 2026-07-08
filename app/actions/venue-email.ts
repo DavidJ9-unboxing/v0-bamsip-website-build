@@ -83,7 +83,7 @@ const SITE_ORIGIN = resolveSiteOrigin()
  * Bump this whenever the baked hero design changes to force every inbox — even
  * previously-contacted ones like the founder's — to refetch the new image.
  */
-const HERO_ASSET_VERSION = "2"
+const HERO_ASSET_VERSION = "3"
 
 /** Appends the asset version as a query param, preserving any existing query. */
 function withHeroVersion(url: string) {

@@ -42,7 +42,102 @@ export interface VenueTailoring {
 //
 // Any venue without an entry uses DEFAULT_HERO below.
 export const TAILORED: Record<number, VenueTailoring> = {
-  // Custom heroes removed — add per-venue entries here as you gather images.
+  37: {
+    heroImage: "/images/venues/alberts-schloss.png",
+    heroAlt: "The ornate lantern-lit facade of Albert's Schloss at night with a crowd gathered outside.",
+  }, // Albert's Schloss
+  48: {
+    heroImage: "/images/venues/atlas-bar.png",
+    heroAlt: "Atlas Bar's covered terrace busy with people, Manchester's skyline rising behind the glass roof.",
+  }, // Atlas Bar
+  66: {
+    heroImage: "/images/venues/dukes-92.png",
+    heroAlt: "The canalside setting of Dukes 92 in Castlefield.",
+  }, // Dukes 92
+  280: {
+    heroImage: "/images/venues/erst.png",
+    heroAlt: "The relaxed interior of Erst wine bar in Ancoats.",
+  }, // Erst
+  65: {
+    heroImage: "/images/venues/freight-island.png",
+    heroAlt: "The vast industrial depot interior of Escape to Freight Island packed with people at long tables under colourful lighting.",
+  }, // Escape to Freight Island
+  282: {
+    heroImage: "/images/venues/finders-keepers.png",
+    heroAlt: "The interior of Finders Keepers bar.",
+  }, // Finders Keepers
+  281: {
+    heroImage: "/images/venues/flawd.png",
+    heroAlt: "Flawd natural wine bar beside New Islington Marina.",
+  }, // Flawd
+  10: {
+    heroImage: "/images/venues/impossible.png",
+    heroAlt: "The theatrical interior of Impossible Manchester.",
+  }, // Impossible Manchester
+  439: {
+    heroImage: "/images/venues/lass-o-gowrie.png",
+    heroAlt: "The Victorian tiled interior of the Lass O'Gowrie pub.",
+  }, // Lass O'Gowrie
+  476: {
+    heroImage: "/images/venues/mojo.png",
+    heroAlt: "The rock-and-roll bar interior of Mojo Manchester.",
+  }, // Mojo Manchester
+  420: {
+    heroImage: "/images/venues/nest.png",
+    heroAlt: "The two-floor Fallowfield bar Nest.",
+  }, // Nest
+  306: {
+    heroImage: "/images/venues/northern-monk.png",
+    heroAlt: "The red-brick taproom of Northern Monk Refectory on Tariff Street.",
+  }, // Northern Monk Refectory MCR
+  77: {
+    heroImage: "/images/venues/port-street.png",
+    heroAlt: "The craft beer bar interior of Port Street Beer House.",
+  }, // Port Street Beer House
+  279: {
+    heroImage: "/images/venues/ramona.png",
+    heroAlt: "The red-lit industrial garage-turned-bar interior of Ramona busy with people.",
+  }, // Ramona
+  283: {
+    heroImage: "/images/venues/seven-brothers.png",
+    heroAlt: "The Seven Bro7hers beerhouse in Ancoats.",
+  }, // Seven Bro7hers Beerhouse Ancoats
+  299: {
+    heroImage: "/images/venues/sicilian-nq.png",
+    heroAlt: "The Sicilian bar and patisserie interior of Sicilian NQ.",
+  }, // Sicilian NQ
+  8: {
+    heroImage: "/images/venues/stage-and-radio.png",
+    heroAlt: "The Northern Quarter bar and club Stage & Radio.",
+  }, // Stage & Radio
+  244: {
+    heroImage: "/images/venues/black-friar.png",
+    heroAlt: "The restored gastropub interior of The Black Friar.",
+  }, // The Black Friar
+  438: {
+    heroImage: "/images/venues/courtyard.png",
+    heroAlt: "The student pub and beer garden The Courtyard Manchester.",
+  }, // The Courtyard Manchester
+  290: {
+    heroImage: "/images/venues/freemount.png",
+    heroAlt: "The late-night live-music pub The Freemount on Oldham Street.",
+  }, // The Freemount
+  57: {
+    heroImage: "/images/venues/liquor-store.png",
+    heroAlt: "The American-style bar and grill interior of The Liquor Store.",
+  }, // The Liquor Store
+  291: {
+    heroImage: "/images/venues/millstone.png",
+    heroAlt: "The Millstone pub busy with people watching live entertainment under fairy lights.",
+  }, // The Millstone
+  247: {
+    heroImage: "/images/venues/old-pint-pot.png",
+    heroAlt: "The riverside Old Pint Pot pub in Salford.",
+  }, // Old Pint Pot
+  95: {
+    heroImage: "/images/venues/salisbury.png",
+    heroAlt: "The traditional real ale interior of The Salisbury Ale House.",
+  }, // The Salisbury Ale House
 };
 
 // ── Defaults for every non-tailored venue ────────────────────────────────────

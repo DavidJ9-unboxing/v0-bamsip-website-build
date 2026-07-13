@@ -162,15 +162,15 @@ export function defaultVenueLaunchContent(ctaUrl: string): VenueEmailContent {
     headline: "we'll buy 100 drinks on your quietest night",
     body: `Hi {{venueName}},
 
-I'm Natan. I'm 20, grew up in Manchester, studying law in Leeds, and I've spent the last few months building an app called BamSip. I'd love {{venueName}} to be one of the first four venues in Manchester on it.
+I'm Natan. I'm 20, grew up in Manchester, studying law in Leeds, and I've spent the last few months building an app called BamSip. It's a nightlife app that fills quiet venues. When your room is quiet, you put a live offer on the app and it goes straight to people nearby who are deciding where to go right now. When you're busy, you switch it off.
 
-Here's the offer. Pick one of your quiet nights and we'll fill the room, 100 people through the door, and we pay for their first drink. All 100, paid straight to your till like any other tap payment.
+I'd love {{venueName}} to be one of the first four venues in Manchester on it, and I'm putting my money where my mouth is.
 
-All we ask in return is that you discount drinks for a couple of hours that night, so the crowd stays and spends after the free round's gone.
+Here's the offer. Pick one of your quiet nights and we'll fill the room. 100 people through the door, and we pay for their first drink. All 100, paid straight to your till like any other tap payment.
 
-Why are we doing this? BamSip puts live offers from venues in front of people nearby who are deciding where to go right now. When you're quiet, you turn demand up. When you're rammed, you leave it off. This launch night is our first real test, so we're paying for the privilege.
+All we ask in return is that you discount drinks for a couple of hours that night, so the crowd stays and spends after the free round is gone.
 
-It costs you nothing, no subscription, no contract, and you set the discount.
+This launch night is our first real test, which is why we're paying for it. It costs you nothing beyond the discount. No subscription, no contract, and you set the discount yourself.
 
 We're picking four venues, and they'll be the first bars in Manchester on the app. Reply "interested" and I'll send some dates over. First come, first pick.
 

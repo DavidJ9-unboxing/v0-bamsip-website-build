@@ -113,7 +113,7 @@ export function buildVenueEmailHtml(content: VenueEmailContent) {
   if (content.mode === "html") return content.rawHtml
 
   const hero = content.heroUrl?.trim()
-    ? `<img src="${content.heroUrl.trim()}" alt="BamSip — Manchester nights, sorted" style="display:block;width:100%;max-width:520px;height:auto;border-radius:12px;margin:0 0 20px;" />`
+    ? `<img src="${content.heroUrl.trim()}" alt="BamSip — Manchester nights, sorted" align="center" style="display:block;width:100%;max-width:520px;height:auto;border-radius:12px;margin:0 auto 20px;" />`
     : ""
   const headline = content.headline.trim()
     ? `<h1 style="font-size:22px;margin:0 0 12px;">${escapeHtml(content.headline.trim())}</h1>`
@@ -146,9 +146,9 @@ export function buildVenueEmailHtml(content: VenueEmailContent) {
  * the composer can offer them as one-click presets.
  */
 export const VENUE_LAUNCH_SUBJECTS = [
-  "{{venueName}}, the first round's on us",
-  "buying the first 100 drinks at {{venueName}}?",
-  "we'll fill your quietest night at {{venueName}}",
+  "We'll buy 100 drinks at {{venueName}} on a quiet night",
+  "100 drinks at {{venueName}}, first round's on us",
+  "We'll fill {{venueName}} on your quietest night",
 ] as const
 
 /** Sensible default subject for the venue launch campaign (with token). */
@@ -159,22 +159,23 @@ export function defaultVenueLaunchContent(ctaUrl: string): VenueEmailContent {
   return {
     mode: "template",
     heroUrl: VENUE_LAUNCH_HERO,
-    headline: "fancy 100 first-time guests, first round on us?",
+    headline: "we'll buy 100 drinks on your quietest night",
     body: `Hi {{venueName}},
 
-{{hook}}
+I'm Natan. I'm 20, grew up in Manchester, studying law in Leeds, and I've spent the last few months building an app called BamSip. It's a nightlife app that fills quiet venues. When your room is quiet, you put a live offer on the app and it goes straight to people nearby who are deciding where to go right now. When you're busy, you switch it off.
 
-Quick one. We're BamSip, Manchester's new nightlife app built to fill your quiet nights: you set a deal, we send the crowd, and the data shows what worked.
+I'd love {{venueName}} to be one of the first four venues in Manchester on it, and I'm putting my money where my mouth is.
 
-We're launching this summer and picking four venues for a launch night. We bring the crowd and buy the first round for the first 100 through your door, then they drink on at an app discount for two hours, all paid straight to your till on Stripe like any normal tap payment.
+Here's the offer. Pick one of your quiet nights and we'll fill the room. 100 people through the door, and we pay for their first drink. All 100, paid straight to your till like any other tap payment.
 
-BamSip is always free to you: no subscription, no lock-in. The only thing you spend is the discount you put into an offer, as often as you like.
+All we ask in return is that you discount drinks for a couple of hours that night, so the crowd stays and spends after the free round is gone.
 
-Four slots. Fancy one? Reply "interested" and I'll send dates, or register {{venueName}} below before the city goes live.
+This launch night is our first real test, which is why we're paying for it. It costs you nothing beyond the discount. No subscription, no contract, and you set the discount yourself.
+
+We're picking four venues, and they'll be the first bars in Manchester on the app. Reply "interested" and I'll send some dates over. First come, first pick.
 
 Cheers,
-[name]
-BamSip · smarter nights out`,
+Natan Turner · BamSip`,
     ctaLabel: "register your interest",
     ctaUrl: "https://www.bamsip.com/venues#interest",
   }

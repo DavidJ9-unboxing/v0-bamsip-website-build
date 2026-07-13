@@ -113,7 +113,7 @@ export function buildVenueEmailHtml(content: VenueEmailContent) {
   if (content.mode === "html") return content.rawHtml
 
   const hero = content.heroUrl?.trim()
-    ? `<img src="${content.heroUrl.trim()}" alt="BamSip — Manchester nights, sorted" style="display:block;width:100%;max-width:520px;height:auto;border-radius:12px;margin:0 0 20px;" />`
+    ? `<img src="${content.heroUrl.trim()}" alt="BamSip — Manchester nights, sorted" align="center" style="display:block;width:100%;max-width:520px;height:auto;border-radius:12px;margin:0 auto 20px;" />`
     : ""
   const headline = content.headline.trim()
     ? `<h1 style="font-size:22px;margin:0 0 12px;">${escapeHtml(content.headline.trim())}</h1>`

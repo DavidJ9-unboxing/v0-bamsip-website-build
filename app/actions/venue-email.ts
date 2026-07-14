@@ -60,11 +60,24 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const SITE_ORIGIN = "https://www.bamsip.com"
 
+/**
+ * A version token that changes on every deploy. Email clients (and Gmail's
+ * image proxy) cache images by URL forever, so when a venue hero is swapped the
+ * old picture keeps showing under the same filename. Appending ?v=<deploy> to
+ * our own hero URLs guarantees each deploy serves a fresh, uncached image.
+ */
+const ASSET_VERSION =
+  process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) ||
+  process.env.VERCEL_DEPLOYMENT_ID ||
+  "dev"
+
 /** Turns a /public-relative hero path into an absolute URL for email clients. */
 function absoluteHero(path: string) {
   if (!path) return path
+  // External/override URLs are used verbatim — we don't own their caching.
   if (/^https?:\/\//i.test(path)) return path
-  return `${SITE_ORIGIN}${path.startsWith("/") ? "" : "/"}${path}`
+  const url = `${SITE_ORIGIN}${path.startsWith("/") ? "" : "/"}${path}`
+  return `${url}${url.includes("?") ? "&" : "?"}v=${ASSET_VERSION}`
 }
 
 /**

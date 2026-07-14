@@ -138,6 +138,100 @@ export const TAILORED: Record<number, VenueTailoring> = {
     heroImage: "/images/venues/salisbury.png",
     heroAlt: "The traditional real ale interior of The Salisbury Ale House.",
   }, // The Salisbury Ale House
+
+  // ── Second wave (BamSip Venue Heroes 2) ─────────────────────────────────────
+  17: {
+    heroImage: "/images/venues/256-wilmslow-road.png",
+    heroAlt: "The Fallowfield Fan Park courtyard at 256 Wilmslow Road packed with people at benches beside a church.",
+  }, // 256 Wilmslow Road
+  292: {
+    heroImage: "/images/venues/bar-fringe.png",
+    heroAlt: "The eclectic yellow-walled interior of Bar Fringe busy with drinkers.",
+  }, // Bar Fringe
+  447: {
+    heroImage: "/images/venues/brickhouse-social.png",
+    heroAlt: "The interior of Brickhouse Social busy with people.",
+  }, // Brickhouse Social
+  435: {
+    heroImage: "/images/venues/house-of-social.png",
+    heroAlt: "The interior of House of Social Manchester busy with people.",
+  }, // House of Social
+  35: {
+    heroImage: "/images/venues/jimmys-nq.png",
+    heroAlt: "The Northern Quarter bar Jimmy's busy with people.",
+  }, // Jimmy's NQ
+  69: {
+    heroImage: "/images/venues/lock-91.png",
+    heroAlt: "The canalside setting of Lock 91 at Deansgate Locks.",
+  }, // Lock 91
+  88: {
+    heroImage: "/images/venues/new-union-hotel.png",
+    heroAlt: "The Gay Village cabaret bar New Union Hotel busy with people.",
+  }, // New Union Hotel
+  434: {
+    heroImage: "/images/venues/north-taproom.png",
+    heroAlt: "The interior of North Taproom busy with people.",
+  }, // North Taproom
+  482: {
+    heroImage: "/images/venues/piccadilly-tap.png",
+    heroAlt: "The station-side bar Piccadilly Tap busy with people.",
+  }, // Piccadilly Tap
+  59: {
+    heroImage: "/images/venues/sandinista.png",
+    heroAlt: "The Northern Quarter bar Sandinista busy with people.",
+  }, // Sandinista
+  424: {
+    heroImage: "/images/venues/squirrels-bar.png",
+    heroAlt: "The interior of Squirrels Bar busy with people.",
+  }, // Squirrels Bar
+  307: {
+    heroImage: "/images/venues/sureshot-taproom.png",
+    heroAlt: "The Sureshot Taproom busy with people.",
+  }, // Sureshot Taproom
+  294: {
+    heroImage: "/images/venues/terrace-nq.png",
+    heroAlt: "The Northern Quarter terrace bar Terrace NQ busy with people.",
+  }, // Terrace NQ
+  94: {
+    heroImage: "/images/venues/bay-horse-tavern.png",
+    heroAlt: "The Northern Quarter pub The Bay Horse Tavern busy with people.",
+  }, // The Bay Horse Tavern
+  427: {
+    heroImage: "/images/venues/gasworks-brew-bar.png",
+    heroAlt: "The Gasworks Brew Bar busy with people.",
+  }, // The Gasworks Brew Bar
+  455: {
+    heroImage: "/images/venues/the-goose.png",
+    heroAlt: "The interior of The Goose busy with people.",
+  }, // The Goose
+  426: {
+    heroImage: "/images/venues/junkyard-golf-club.png",
+    heroAlt: "The neon-lit crazy golf bar Junkyard Golf Club busy with people.",
+  }, // Junkyard Golf Club
+  243: {
+    heroImage: "/images/venues/kings-arms-salford.png",
+    heroAlt: "The Salford pub and theatre The Kings Arms busy with people.",
+  }, // The Kings Arms Salford
+  303: {
+    heroImage: "/images/venues/the-mancunian.png",
+    heroAlt: "The photo-lined interior of The Mancunian busy with people.",
+  }, // The Mancunian
+  486: {
+    heroImage: "/images/venues/star-and-garter.png",
+    heroAlt: "The live music venue The Star and Garter busy with a crowd.",
+  }, // The Star and Garter
+  54: {
+    heroImage: "/images/venues/whiskey-jar.png",
+    heroAlt: "The dimly lit Northern Quarter bar The Whiskey Jar busy with a crowd.",
+  }, // The Whiskey Jar
+  308: {
+    heroImage: "/images/venues/track-brewing-co.png",
+    heroAlt: "The Track Brewing Co taproom busy with people.",
+  }, // Track Brewing Co Taproom
+  452: {
+    heroImage: "/images/venues/via-manchester.png",
+    heroAlt: "The Canal Street bar Via Manchester busy with people.",
+  }, // Via Manchester
 };
 
 // ── Defaults for every non-tailored venue ────────────────────────────────────

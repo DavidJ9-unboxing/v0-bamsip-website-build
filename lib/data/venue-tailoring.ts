@@ -232,6 +232,60 @@ export const TAILORED: Record<number, VenueTailoring> = {
     heroImage: "/images/venues/via-manchester.png",
     heroAlt: "The Canal Street bar Via Manchester busy with people.",
   }, // Via Manchester
+
+  // ── Third wave (BamSip Venue Heroes 3) ──────────────────────────────────────
+  472: {
+    heroImage: "/images/venues/alberts-shed.png",
+    heroAlt: "The glass-canopied waterside terrace and bar at Albert's Shed in Castlefield.",
+  }, // Albert's Shed
+  445: {
+    heroImage: "/images/venues/bundobust-brewery.png",
+    heroAlt: "The Bundobust Brewery bar and dining space busy with people.",
+  }, // Bundobust Brewery
+  302: {
+    heroImage: "/images/venues/head-of-steam-nq.png",
+    heroAlt: "The circular bar and beer lines at Head of Steam NQ busy with drinkers.",
+  }, // Head of Steam NQ
+  446: {
+    heroImage: "/images/venues/rain-bar.png",
+    heroAlt: "The Rain Bar, a converted umbrella factory pub, busy with people.",
+  }, // Rain Bar
+  461: {
+    heroImage: "/images/venues/revolution-deansgate-locks.png",
+    heroAlt: "The multi-floor party bar Revolution Deansgate Locks busy with a crowd.",
+  }, // Revolution Deansgate Locks
+  471: {
+    heroImage: "/images/venues/slug-and-lettuce-spinningfields.png",
+    heroAlt: "The riverside terrace and bar at Slug & Lettuce Spinningfields busy with people.",
+  }, // Slug & Lettuce Spinningfields
+  479: {
+    heroImage: "/images/venues/the-anthologist.png",
+    heroAlt: "The Anthologist bar on St Peter's Square busy with an after-work crowd.",
+  }, // The Anthologist
+  474: {
+    heroImage: "/images/venues/the-banyan-tree.png",
+    heroAlt: "The cosy leather sofas and chandeliers of The Banyan Tree in Castlefield.",
+  }, // The Banyan Tree
+  469: {
+    heroImage: "/images/venues/the-blues-kitchen.png",
+    heroAlt: "A live band playing to a crowd at The Blues Kitchen Manchester.",
+  }, // The Blues Kitchen Manchester
+  78: {
+    heroImage: "/images/venues/the-castle-hotel.png",
+    heroAlt: "The historic Northern Quarter pub The Castle Hotel busy with people.",
+  }, // The Castle Hotel
+  454: {
+    heroImage: "/images/venues/the-eagle-manchester.png",
+    heroAlt: "The members' basement bar The Eagle Manchester busy with its crowd.",
+  }, // The Eagle Manchester
+  64: {
+    heroImage: "/images/venues/the-edinburgh-castle.png",
+    heroAlt: "The beautifully restored 1811 pub The Edinburgh Castle busy with people.",
+  }, // The Edinburgh Castle
+  105: {
+    heroImage: "/images/venues/volta.png",
+    heroAlt: "The lit-up street frontage of the small-plates bar Volta in West Didsbury at night.",
+  }, // Volta
 };
 
 // ── Defaults for every non-tailored venue ────────────────────────────────────

@@ -16,6 +16,7 @@ import {
   defaultVenueLaunchContent,
   type VenueEmailContent,
 } from "@/lib/email-templates"
+import { DEFAULT_HERO, DEFAULT_HERO_ALT } from "@/lib/data/venue-tailoring"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -708,24 +709,26 @@ export function VenueEmailComposer({
                 {previewVenue.venueName}
               </p>
 
-              {previewVenue.tailoring && (
-                <div className="mt-2 flex flex-col gap-2">
+              <div className="mt-2 flex flex-col gap-2">
+                {previewVenue.tailoring?.hook && (
                   <p className="text-xs italic leading-relaxed text-cream2">
                     {`"${previewVenue.tailoring.hook}"`}
                   </p>
-                  <div className="flex items-center gap-2">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={previewVenue.tailoring.heroImage || "/placeholder.svg"}
-                      alt={previewVenue.tailoring.heroAlt}
-                      className="h-12 w-20 shrink-0 rounded-md object-cover ring-1 ring-hairline"
-                    />
-                    <span className="break-all text-[11px] text-mute">
-                      {previewVenue.tailoring.heroImage}
-                    </span>
-                  </div>
+                )}
+                <div className="flex items-center gap-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={previewVenue.tailoring?.heroImage || DEFAULT_HERO}
+                    alt={previewVenue.tailoring?.heroAlt || DEFAULT_HERO_ALT}
+                    className="h-12 w-20 shrink-0 rounded-md object-cover ring-1 ring-hairline"
+                  />
+                  <span className="break-all text-[11px] text-mute">
+                    {previewVenue.tailoring
+                      ? previewVenue.tailoring.heroImage
+                      : `${DEFAULT_HERO} · default hero`}
+                  </span>
                 </div>
-              )}
+              </div>
 
               <p className="mt-2 text-xs text-mute">
                 Subject:{" "}
